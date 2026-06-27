@@ -6,12 +6,13 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: https://auth.lausi95.net/realms/stringpro
-  data:
-    mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/stringpro}
   docker:
     compose:
       enabled: false
+  mongodb:
+    uri: ${MONGODB_URI:mongodb://localhost:27017/stringpro}
+    username: ${MONGODB_USERNAME:root}
+    password: ${MONGODB_PASSWORD:example}
 
 server:
   port: 8080
