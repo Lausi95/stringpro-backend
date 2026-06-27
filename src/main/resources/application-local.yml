@@ -1,0 +1,8 @@
+spring:
+  docker:
+    compose:
+      enabled: true
+
+logging:
+  level:
+    com.stringpro: debug

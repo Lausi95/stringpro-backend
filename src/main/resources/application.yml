@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: stringpro
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://auth.lausi95.net/realms/stringpro
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/stringpro}
+  docker:
+    compose:
+      enabled: false
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    root: info
