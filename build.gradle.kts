@@ -50,6 +50,27 @@ kotlin {
     }
 }
 
+// The Kotlin Gradle plugin force-aligns kotlin-compiler-embeddable to the project's
+// Kotlin version (2.1.21) on every configuration, including the lint tool classpaths.
+// That breaks detekt 1.23.8 (built against 2.0.21, rejects the bump) and ktlint 1.0.1
+// (built against 1.9.10, references the HEADER_KEYWORD token that 2.1.21 removed).
+// Pin each tool's bundled compiler back to the version it ships with so the rulesets
+// run unchanged.
+configurations.named("detekt") {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlin" && requested.name == "kotlin-compiler-embeddable") {
+            useVersion("2.0.21")
+        }
+    }
+}
+configurations.matching { it.name.startsWith("ktlint") }.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlin" && requested.name == "kotlin-compiler-embeddable") {
+            useVersion("1.9.10")
+        }
+    }
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }
