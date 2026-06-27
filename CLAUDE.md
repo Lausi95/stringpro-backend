@@ -33,6 +33,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Use conventional commit style on the current branch (e.g. `feat:`, `fix:`, `refactor:`, `test:`, `chore:`).
 
+Before running `git commit`, always show the proposed commit message and wait for approval.
+
 ## Domain Vocabulary
 
 Use these exact terms everywhere (code, logs, comments, API responses). See `CONTEXT.md` for the full reference.
@@ -120,7 +122,16 @@ Always log with SLF4J (`private val log = LoggerFactory.getLogger(javaClass)`). 
 - Follow red-green-refactor: write a failing test, make it pass minimally, then refactor.
 - Test naming convention: `should<ExpectedBehavior>When<Condition>` in backtick strings.
 
-**Spring Boot 4.x note**: `@WebMvcTest` moved to `org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest` (requires `spring-boot-starter-webmvc-test` on the test classpath). Add `@MockkBean` for `JwtDecoder` in `@WebMvcTest` slices to prevent issuer URI validation at startup.
+**Spring Boot 4.x note**: `@WebMvcTest` moved to `org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest` (requires `spring-boot-starter-webmvc-test` on the test classpath). Every controller slice test requires this boilerplate to wire security and error handling correctly:
+```kotlin
+@WebMvcTest(XxxController::class)
+@Import(SecurityConfig::class, GlobalExceptionHandler::class)
+class XxxControllerTest {
+    @MockkBean private lateinit var jwtDecoder: JwtDecoder
+    // mock each use case interface individually
+}
+```
+Use `with(jwt())` from `SecurityMockMvcRequestPostProcessors` on every request that should be authenticated.
 
 ## Key Dependencies (Gradle)
 
