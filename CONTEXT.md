@@ -34,10 +34,18 @@ _Avoid_: Face size, racket size
 **Service Fee**: The labor charge applied to a Job, configured in Settings.
 _Avoid_: Labor cost, stringing fee
 
-**String Fee**: The material cost for the string used in a Job, configured per String in inventory.
-_Avoid_: Material cost, string cost
+**String Fee**: The customer-facing material charge for the string used in a Job. Sourced from the String Reel selected for that Job.
+_Avoid_: Material cost, string cost, Job Price
 
 ### Inventory
 
-**String**: A specific string product held in inventory. Each String has an availability toggle and a fee.
-_Avoid_: Product, item, cord
+**String Reel**: A physical reel of string held in inventory — the inventory unit itself (there is no separate string-product catalog). Carries its own cost, length, and depletion lifecycle. Short form: **Reel**.
+_Avoid_: String, product, item, cord, spool
+
+**String**: _(retired)_ Previously meant a string-product catalog entry; superseded by **String Reel**, which is now the inventory unit.
+
+**Reel State**: Where a String Reel is in its life: New → In Use → Used Up. Set manually by the Stringer; unlike a Job's Stage, it may move in any direction. A Used Up reel stays in the records (it cost money); deletion is reserved for mistaken entries.
+_Avoid_: Stage (that is Job-only), status, phase
+
+**Material**: What a String Reel is physically made of — one of Polyester, Natural Gut, Multifilament, Synthetic Gut. A reel is a single material; a two-string ("hybrid") setup is a Job-level combination of two Reels, never a material.
+_Avoid_: Hybrid (as a material), composition
