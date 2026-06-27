@@ -29,6 +29,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew detekt
 ```
 
+## Commits
+
+Use conventional commit style on the current branch (e.g. `feat:`, `fix:`, `refactor:`, `test:`, `chore:`).
+
+## Domain Vocabulary
+
+Use these exact terms everywhere (code, logs, comments, API responses). See `CONTEXT.md` for the full reference.
+
+| Term | Meaning | Avoid |
+|---|---|---|
+| **Job** | Unit of work — a Racket brought in to be strung | Order, request, ticket |
+| **Stage** | Lifecycle state of a Job: Queued → In Progress → Ready → Done → Paid | Status, phase, step |
+| **Stringer** | The operator of the app | User, admin |
+| **Customer** | Person who brings Rackets in | Client, player |
+| **Racket** | Tennis racket owned by a Customer | Equipment, item |
+| **Service Fee** | Labor charge per Job | Labor cost, stringing fee |
+| **String Fee** | Material cost for the string product | Material cost, string cost |
+| **String** | A string product in inventory | Product, cord |
+
 ## Architecture
 
 This project follows Clean Architecture. Dependencies point inward: Infrastructure → Application → Domain.
@@ -54,6 +73,12 @@ src/main/kotlin/com/stringpro/
 - `domain/service` classes implement the `ports/in` interfaces and depend only on `ports/out` interfaces — never on infrastructure directly.
 - Controllers resolve use cases via the `ports/in` interfaces, never call service classes directly.
 - Each aggregate gets its own sub-package at every layer (e.g. `model/job/`, `service/job/`, `ports/in/job/`).
+
+**Use case interface pattern:** Each use case is its own interface in `ports/in/<aggregate>/`. The service class for that aggregate implements all of them. Controllers inject each use case interface individually (not the service class). Input is passed as `XxxCommand` (mutations) or `XxxQuery` (reads) value objects defined alongside the interface.
+
+**Soft-delete pattern:** Aggregates carry a `deletedAt: Instant?` field. Repository adapters filter on `deletedAtIsNull` so soft-deleted records are invisible to all queries. Hard-deletes are not used.
+
+**Error handling:** `GlobalExceptionHandler` (`infrastructure/web/`) maps domain exceptions to RFC 7807 `ProblemDetail` responses. Add a handler there for each new domain exception type. Use `@Valid` + `jakarta.validation` constraints on request bodies; validation failures are also caught by the handler.
 
 ## Profiles
 
@@ -104,11 +129,13 @@ Always log with SLF4J (`private val log = LoggerFactory.getLogger(javaClass)`). 
 | Web | `spring-boot-starter-web` |
 | Security / JWT | `spring-boot-starter-oauth2-resource-server` |
 | MongoDB | `spring-boot-starter-data-mongodb` |
+| Validation | `spring-boot-starter-validation` |
 | OpenAPI docs | `org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0` |
 | Structured logging | `net.logstash.logback:logstash-logback-encoder:8.1` |
 | Docker Compose (local) | `spring-boot-docker-compose` (`developmentOnly`) |
 | Test mocking | `io.mockk:mockk:1.14.2`, `com.ninja-squad:springmockk:4.0.2` |
 | Web MVC test slice | `spring-boot-starter-webmvc-test` |
+| MongoDB test slice | `spring-boot-data-mongodb-test` |
 | Security test support | `org.springframework.security:spring-security-test` |
 | Embedded MongoDB | `de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring4x:4.24.0` |
 | Lint | `ktlint-gradle`, `detekt` |
