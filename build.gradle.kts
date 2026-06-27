@@ -27,6 +27,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("net.logstash.logback:logstash-logback-encoder:8.1")
     developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 
@@ -40,6 +41,7 @@ dependencies {
     testImplementation("io.mockk:mockk:1.14.2")
     testImplementation("com.ninja-squad:springmockk:4.0.2")
     testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring4x:4.24.0")
+    testImplementation("org.springframework.boot:spring-boot-data-mongodb-test")
 }
 
 kotlin {

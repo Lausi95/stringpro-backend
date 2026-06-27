@@ -2,6 +2,7 @@ spring:
   docker:
     compose:
       enabled: true
+      lifecycle-management: start_and_stop
 
 logging:
   level:
