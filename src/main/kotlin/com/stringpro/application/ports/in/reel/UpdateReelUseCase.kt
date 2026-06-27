@@ -5,7 +5,10 @@ import com.stringpro.application.domain.model.reel.Reel
 import java.time.LocalDate
 
 interface UpdateReelUseCase {
-    fun update(id: String, command: UpdateReelCommand): Reel
+    fun update(
+        id: String,
+        command: UpdateReelCommand,
+    ): Reel
 }
 
 data class UpdateReelCommand(

@@ -15,14 +15,15 @@ data class RacketResponse(
     val createdAt: Instant,
 )
 
-fun Racket.toResponse() = RacketResponse(
-    id = id,
-    customerId = customerId,
-    brand = brand,
-    model = model,
-    headSize = headSize,
-    stringMains = stringMains,
-    stringCrosses = stringCrosses,
-    notes = notes,
-    createdAt = createdAt,
-)
+fun Racket.toResponse() =
+    RacketResponse(
+        id = id,
+        customerId = customerId,
+        brand = brand,
+        model = model,
+        headSize = headSize,
+        stringMains = stringMains,
+        stringCrosses = stringCrosses,
+        notes = notes,
+        createdAt = createdAt,
+    )

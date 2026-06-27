@@ -43,19 +43,22 @@ class RacketController(
     @ApiResponse(responseCode = "201", description = "Racket created")
     @ApiResponse(responseCode = "400", description = "Invalid request body")
     @ApiResponse(responseCode = "404", description = "Customer not found")
-    fun create(@Valid @RequestBody request: CreateRacketRequest): ResponseEntity<RacketResponse> {
+    fun create(
+        @Valid @RequestBody request: CreateRacketRequest,
+    ): ResponseEntity<RacketResponse> {
         MDC.put("customerId", request.customerId)
-        val racket = createRacket.create(
-            CreateRacketCommand(
-                customerId = request.customerId,
-                brand = request.brand,
-                model = request.model,
-                headSize = request.headSize,
-                stringMains = request.stringMains,
-                stringCrosses = request.stringCrosses,
-                notes = request.notes,
-            ),
-        )
+        val racket =
+            createRacket.create(
+                CreateRacketCommand(
+                    customerId = request.customerId,
+                    brand = request.brand,
+                    model = request.model,
+                    headSize = request.headSize,
+                    stringMains = request.stringMains,
+                    stringCrosses = request.stringCrosses,
+                    notes = request.notes,
+                ),
+            )
         MDC.put("racketId", racket.id)
         log.info("Racket created")
         return ResponseEntity
@@ -67,7 +70,9 @@ class RacketController(
     @Operation(summary = "List rackets for a customer")
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "400", description = "Missing customerId")
-    fun list(@RequestParam customerId: String): List<RacketResponse> {
+    fun list(
+        @RequestParam customerId: String,
+    ): List<RacketResponse> {
         MDC.put("customerId", customerId)
         return listRackets.list(ListRacketsQuery(customerId)).map { it.toResponse() }
     }
@@ -76,7 +81,9 @@ class RacketController(
     @Operation(summary = "Get a racket by ID")
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "404", description = "Racket not found")
-    fun get(@PathVariable id: String): RacketResponse {
+    fun get(
+        @PathVariable id: String,
+    ): RacketResponse {
         MDC.put("racketId", id)
         return getRacket.get(id).toResponse()
     }
@@ -108,7 +115,9 @@ class RacketController(
     @Operation(summary = "Delete a racket")
     @ApiResponse(responseCode = "204", description = "Racket deleted")
     @ApiResponse(responseCode = "404", description = "Racket not found")
-    fun delete(@PathVariable id: String): ResponseEntity<Void> {
+    fun delete(
+        @PathVariable id: String,
+    ): ResponseEntity<Void> {
         MDC.put("racketId", id)
         deleteRacket.delete(id)
         return ResponseEntity.noContent().build()

@@ -22,20 +22,22 @@ data class PagedCustomerResponse(
     val size: Int,
 )
 
-fun Customer.toResponse() = CustomerResponse(
-    id = id,
-    firstName = firstName,
-    lastName = lastName,
-    email = email,
-    phoneNumber = phoneNumber,
-    notes = notes,
-    createdAt = createdAt,
-)
+fun Customer.toResponse() =
+    CustomerResponse(
+        id = id,
+        firstName = firstName,
+        lastName = lastName,
+        email = email,
+        phoneNumber = phoneNumber,
+        notes = notes,
+        createdAt = createdAt,
+    )
 
-fun PageResult<Customer>.toResponse() = PagedCustomerResponse(
-    content = content.map { it.toResponse() },
-    totalElements = totalElements,
-    totalPages = totalPages,
-    page = page,
-    size = size,
-)
+fun PageResult<Customer>.toResponse() =
+    PagedCustomerResponse(
+        content = content.map { it.toResponse() },
+        totalElements = totalElements,
+        totalPages = totalPages,
+        page = page,
+        size = size,
+    )

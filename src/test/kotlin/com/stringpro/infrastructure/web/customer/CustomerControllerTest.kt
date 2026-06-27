@@ -1,6 +1,5 @@
 package com.stringpro.infrastructure.web.customer
 
-import tools.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import com.stringpro.application.domain.model.PageResult
 import com.stringpro.application.domain.model.customer.Customer
@@ -26,19 +25,25 @@ import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.put
+import tools.jackson.databind.ObjectMapper
 
 @WebMvcTest(CustomerController::class)
 @Import(SecurityConfig::class, GlobalExceptionHandler::class)
 class CustomerControllerTest {
-
     @Autowired private lateinit var mvc: MockMvc
+
     @Autowired private lateinit var objectMapper: ObjectMapper
 
     @MockkBean private lateinit var jwtDecoder: JwtDecoder
+
     @MockkBean private lateinit var createCustomer: CreateCustomerUseCase
+
     @MockkBean private lateinit var getCustomer: GetCustomerUseCase
+
     @MockkBean private lateinit var listCustomers: ListCustomersUseCase
+
     @MockkBean private lateinit var updateCustomer: UpdateCustomerUseCase
+
     @MockkBean private lateinit var deleteCustomer: DeleteCustomerUseCase
 
     @Test
@@ -148,29 +153,32 @@ class CustomerControllerTest {
         mvc.get("/customers").andExpect { status { isUnauthorized() } }
     }
 
-    private fun aCustomer() = Customer(
-        id = "id-1",
-        firstName = "Tom",
-        lastName = "Lausmann",
-        email = "tom@example.com",
-        phoneNumber = "+49123456",
-        notes = null,
-        createdAt = java.time.Instant.EPOCH,
-    )
+    private fun aCustomer() =
+        Customer(
+            id = "id-1",
+            firstName = "Tom",
+            lastName = "Lausmann",
+            email = "tom@example.com",
+            phoneNumber = "+49123456",
+            notes = null,
+            createdAt = java.time.Instant.EPOCH,
+        )
 
-    private fun aCreateRequest() = CreateCustomerRequest(
-        firstName = "Tom",
-        lastName = "Lausmann",
-        email = "tom@example.com",
-        phoneNumber = "+49123456",
-        notes = null,
-    )
+    private fun aCreateRequest() =
+        CreateCustomerRequest(
+            firstName = "Tom",
+            lastName = "Lausmann",
+            email = "tom@example.com",
+            phoneNumber = "+49123456",
+            notes = null,
+        )
 
-    private fun aUpdateRequest() = UpdateCustomerRequest(
-        firstName = "Tom",
-        lastName = "Lausmann",
-        email = "tom@example.com",
-        phoneNumber = "+49123456",
-        notes = null,
-    )
+    private fun aUpdateRequest() =
+        UpdateCustomerRequest(
+            firstName = "Tom",
+            lastName = "Lausmann",
+            email = "tom@example.com",
+            phoneNumber = "+49123456",
+            notes = null,
+        )
 }

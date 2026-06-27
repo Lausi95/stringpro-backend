@@ -73,31 +73,28 @@ data class ReelResponse(
     val createdAt: Instant,
 )
 
-fun Reel.toResponse() = ReelResponse(
-    id = id,
-    brand = brand,
-    model = model,
-    material = material,
-    gauge = hundredthsMmToDecimal(gaugeHundredthsMm),
-    reelLengthMeters = reelLengthMeters,
-    cost = centsToEuros(costCents),
-    stringFee = centsToEuros(stringFeeCents),
-    metersPerJob = metersPerJob,
-    purchaseDate = purchaseDate,
-    state = state,
-    createdAt = createdAt,
-)
+fun Reel.toResponse() =
+    ReelResponse(
+        id = id,
+        brand = brand,
+        model = model,
+        material = material,
+        gauge = hundredthsMmToDecimal(gaugeHundredthsMm),
+        reelLengthMeters = reelLengthMeters,
+        cost = centsToEuros(costCents),
+        stringFee = centsToEuros(stringFeeCents),
+        metersPerJob = metersPerJob,
+        purchaseDate = purchaseDate,
+        state = state,
+        createdAt = createdAt,
+    )
 
 // --- Unit conversions at the API edge ---
 
-fun eurosToCents(euros: BigDecimal): Long =
-    euros.movePointRight(2).setScale(0, RoundingMode.HALF_UP).longValueExact()
+fun eurosToCents(euros: BigDecimal): Long = euros.movePointRight(2).setScale(0, RoundingMode.HALF_UP).longValueExact()
 
-fun centsToEuros(cents: Long): BigDecimal =
-    BigDecimal.valueOf(cents).movePointLeft(2)
+fun centsToEuros(cents: Long): BigDecimal = BigDecimal.valueOf(cents).movePointLeft(2)
 
-fun decimalMmToHundredths(mm: BigDecimal): Int =
-    mm.movePointRight(2).setScale(0, RoundingMode.HALF_UP).intValueExact()
+fun decimalMmToHundredths(mm: BigDecimal): Int = mm.movePointRight(2).setScale(0, RoundingMode.HALF_UP).intValueExact()
 
-fun hundredthsMmToDecimal(hundredths: Int): BigDecimal =
-    BigDecimal.valueOf(hundredths.toLong()).movePointLeft(2)
+fun hundredthsMmToDecimal(hundredths: Int): BigDecimal = BigDecimal.valueOf(hundredths.toLong()).movePointLeft(2)

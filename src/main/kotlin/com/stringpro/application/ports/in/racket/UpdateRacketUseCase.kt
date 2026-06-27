@@ -3,7 +3,10 @@ package com.stringpro.application.ports.`in`.racket
 import com.stringpro.application.domain.model.racket.Racket
 
 interface UpdateRacketUseCase {
-    fun update(id: String, command: UpdateRacketCommand): Racket
+    fun update(
+        id: String,
+        command: UpdateRacketCommand,
+    ): Racket
 }
 
 data class UpdateRacketCommand(

@@ -26,7 +26,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Lint / static analysis
 ./gradlew ktlintCheck
-./gradlew detekt
 ```
 
 ## Commits
@@ -149,4 +148,4 @@ Use `with(jwt())` from `SecurityMockMvcRequestPostProcessors` on every request t
 | MongoDB test slice | `spring-boot-data-mongodb-test` |
 | Security test support | `org.springframework.security:spring-security-test` |
 | Embedded MongoDB | `de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring4x:4.24.0` |
-| Lint | `ktlint-gradle`, `detekt` |
+| Lint | `ktlint-gradle` |

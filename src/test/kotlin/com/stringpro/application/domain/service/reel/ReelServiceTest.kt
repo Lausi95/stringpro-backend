@@ -22,7 +22,6 @@ import java.time.Instant
 import java.time.LocalDate
 
 class ReelServiceTest {
-
     private val reelRepository: ReelRepository = mockk()
     private val service = ReelService(reelRepository)
 
@@ -31,19 +30,20 @@ class ReelServiceTest {
         val slot = slot<Reel>()
         every { reelRepository.save(capture(slot)) } answers { slot.captured }
 
-        val result = service.create(
-            CreateReelCommand(
-                brand = "Luxilon",
-                model = "ALU Power",
-                material = Material.POLYESTER,
-                gaugeHundredthsMm = 125,
-                reelLengthMeters = 200,
-                costCents = 12000,
-                stringFeeCents = 2500,
-                metersPerJob = 11,
-                purchaseDate = LocalDate.of(2026, 1, 15),
-            ),
-        )
+        val result =
+            service.create(
+                CreateReelCommand(
+                    brand = "Luxilon",
+                    model = "ALU Power",
+                    material = Material.POLYESTER,
+                    gaugeHundredthsMm = 125,
+                    reelLengthMeters = 200,
+                    costCents = 12000,
+                    stringFeeCents = 2500,
+                    metersPerJob = 11,
+                    purchaseDate = LocalDate.of(2026, 1, 15),
+                ),
+            )
 
         assertNotNull(result.id)
         assertEquals("Luxilon", result.brand)
@@ -97,20 +97,21 @@ class ReelServiceTest {
         every { reelRepository.findById("id-1") } returns aReel(id = "id-1")
         every { reelRepository.save(capture(slot)) } answers { slot.captured }
 
-        val result = service.update(
-            "id-1",
-            UpdateReelCommand(
-                brand = "Babolat",
-                model = "RPM Blast",
-                material = Material.POLYESTER,
-                gaugeHundredthsMm = 130,
-                reelLengthMeters = 100,
-                costCents = 9000,
-                stringFeeCents = 3000,
-                metersPerJob = 12,
-                purchaseDate = LocalDate.of(2026, 2, 1),
-            ),
-        )
+        val result =
+            service.update(
+                "id-1",
+                UpdateReelCommand(
+                    brand = "Babolat",
+                    model = "RPM Blast",
+                    material = Material.POLYESTER,
+                    gaugeHundredthsMm = 130,
+                    reelLengthMeters = 100,
+                    costCents = 9000,
+                    stringFeeCents = 3000,
+                    metersPerJob = 12,
+                    purchaseDate = LocalDate.of(2026, 2, 1),
+                ),
+            )
 
         assertEquals("Babolat", result.brand)
         assertEquals("RPM Blast", result.model)
@@ -124,20 +125,21 @@ class ReelServiceTest {
         every { reelRepository.findById("id-1") } returns aReel(id = "id-1", state = ReelState.IN_USE)
         every { reelRepository.save(capture(slot)) } answers { slot.captured }
 
-        val result = service.update(
-            "id-1",
-            UpdateReelCommand(
-                brand = "Babolat",
-                model = "RPM Blast",
-                material = Material.POLYESTER,
-                gaugeHundredthsMm = 130,
-                reelLengthMeters = 100,
-                costCents = 9000,
-                stringFeeCents = 3000,
-                metersPerJob = 12,
-                purchaseDate = LocalDate.of(2026, 2, 1),
-            ),
-        )
+        val result =
+            service.update(
+                "id-1",
+                UpdateReelCommand(
+                    brand = "Babolat",
+                    model = "RPM Blast",
+                    material = Material.POLYESTER,
+                    gaugeHundredthsMm = 130,
+                    reelLengthMeters = 100,
+                    costCents = 9000,
+                    stringFeeCents = 3000,
+                    metersPerJob = 12,
+                    purchaseDate = LocalDate.of(2026, 2, 1),
+                ),
+            )
 
         assertEquals(ReelState.IN_USE, result.state)
     }

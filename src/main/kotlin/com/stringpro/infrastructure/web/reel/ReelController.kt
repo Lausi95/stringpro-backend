@@ -47,20 +47,23 @@ class ReelController(
     @Operation(summary = "Create a string reel")
     @ApiResponse(responseCode = "201", description = "Reel created")
     @ApiResponse(responseCode = "400", description = "Invalid request body")
-    fun create(@Valid @RequestBody request: CreateReelRequest): ResponseEntity<ReelResponse> {
-        val reel = createReel.create(
-            CreateReelCommand(
-                brand = request.brand,
-                model = request.model,
-                material = request.material!!,
-                gaugeHundredthsMm = decimalMmToHundredths(request.gauge),
-                reelLengthMeters = request.reelLengthMeters,
-                costCents = eurosToCents(request.cost),
-                stringFeeCents = eurosToCents(request.stringFee),
-                metersPerJob = request.metersPerJob,
-                purchaseDate = request.purchaseDate,
-            ),
-        )
+    fun create(
+        @Valid @RequestBody request: CreateReelRequest,
+    ): ResponseEntity<ReelResponse> {
+        val reel =
+            createReel.create(
+                CreateReelCommand(
+                    brand = request.brand,
+                    model = request.model,
+                    material = request.material!!,
+                    gaugeHundredthsMm = decimalMmToHundredths(request.gauge),
+                    reelLengthMeters = request.reelLengthMeters,
+                    costCents = eurosToCents(request.cost),
+                    stringFeeCents = eurosToCents(request.stringFee),
+                    metersPerJob = request.metersPerJob,
+                    purchaseDate = request.purchaseDate,
+                ),
+            )
         MDC.put("reelId", reel.id)
         log.info("Reel created")
         return ResponseEntity
@@ -71,14 +74,17 @@ class ReelController(
     @GetMapping
     @Operation(summary = "List string reels, optionally filtered by state")
     @ApiResponse(responseCode = "200", description = "OK")
-    fun list(@RequestParam(required = false) state: ReelState?): List<ReelResponse> =
-        listReels.list(ListReelsQuery(state)).map { it.toResponse() }
+    fun list(
+        @RequestParam(required = false) state: ReelState?,
+    ): List<ReelResponse> = listReels.list(ListReelsQuery(state)).map { it.toResponse() }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get a string reel by ID")
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "404", description = "Reel not found")
-    fun get(@PathVariable id: String): ReelResponse {
+    fun get(
+        @PathVariable id: String,
+    ): ReelResponse {
         MDC.put("reelId", id)
         return getReel.get(id).toResponse()
     }
@@ -128,7 +134,9 @@ class ReelController(
     @Operation(summary = "Delete a string reel")
     @ApiResponse(responseCode = "204", description = "Reel deleted")
     @ApiResponse(responseCode = "404", description = "Reel not found")
-    fun delete(@PathVariable id: String): ResponseEntity<Void> {
+    fun delete(
+        @PathVariable id: String,
+    ): ResponseEntity<Void> {
         MDC.put("reelId", id)
         deleteReel.delete(id)
         return ResponseEntity.noContent().build()

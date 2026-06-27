@@ -14,7 +14,6 @@ import java.util.UUID
 
 @DataMongoTest
 class RacketRepositoryAdapterTest {
-
     @Autowired private lateinit var mongoRepository: RacketMongoRepository
     private lateinit var adapter: RacketRepositoryAdapter
 
@@ -79,15 +78,16 @@ class RacketRepositoryAdapterTest {
         assertEquals(0, result.size)
     }
 
-    private fun aRacket(customerId: String = "cust-1") = Racket(
-        id = UUID.randomUUID().toString(),
-        customerId = customerId,
-        brand = "Babolat",
-        model = "Pure Aero",
-        headSize = 645,
-        stringMains = 16,
-        stringCrosses = 19,
-        notes = null,
-        createdAt = Instant.now(),
-    )
+    private fun aRacket(customerId: String = "cust-1") =
+        Racket(
+            id = UUID.randomUUID().toString(),
+            customerId = customerId,
+            brand = "Babolat",
+            model = "Pure Aero",
+            headSize = 645,
+            stringMains = 16,
+            stringCrosses = 19,
+            notes = null,
+            createdAt = Instant.now(),
+        )
 }

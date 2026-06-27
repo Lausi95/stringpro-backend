@@ -43,16 +43,19 @@ class CustomerController(
     @ApiResponse(responseCode = "201", description = "Customer created")
     @ApiResponse(responseCode = "400", description = "Invalid request body")
     @ApiResponse(responseCode = "409", description = "Email already in use")
-    fun create(@Valid @RequestBody request: CreateCustomerRequest): ResponseEntity<CustomerResponse> {
-        val customer = createCustomer.create(
-            CreateCustomerCommand(
-                firstName = request.firstName,
-                lastName = request.lastName,
-                email = request.email,
-                phoneNumber = request.phoneNumber,
-                notes = request.notes,
-            ),
-        )
+    fun create(
+        @Valid @RequestBody request: CreateCustomerRequest,
+    ): ResponseEntity<CustomerResponse> {
+        val customer =
+            createCustomer.create(
+                CreateCustomerCommand(
+                    firstName = request.firstName,
+                    lastName = request.lastName,
+                    email = request.email,
+                    phoneNumber = request.phoneNumber,
+                    notes = request.notes,
+                ),
+            )
         MDC.put("customerId", customer.id)
         log.info("Customer created")
         return ResponseEntity
@@ -67,15 +70,15 @@ class CustomerController(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "20") size: Int,
         @RequestParam(required = false) name: String?,
-    ): PagedCustomerResponse =
-        listCustomers.list(ListCustomersQuery(page, size, name)).toResponse()
+    ): PagedCustomerResponse = listCustomers.list(ListCustomersQuery(page, size, name)).toResponse()
 
     @GetMapping("/{id}")
     @Operation(summary = "Get a customer by ID")
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "404", description = "Customer not found")
-    fun get(@PathVariable id: String): CustomerResponse =
-        getCustomer.get(id).toResponse()
+    fun get(
+        @PathVariable id: String,
+    ): CustomerResponse = getCustomer.get(id).toResponse()
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a customer")
@@ -104,7 +107,9 @@ class CustomerController(
     @Operation(summary = "Delete a customer")
     @ApiResponse(responseCode = "204", description = "Customer deleted")
     @ApiResponse(responseCode = "404", description = "Customer not found")
-    fun delete(@PathVariable id: String): ResponseEntity<Void> {
+    fun delete(
+        @PathVariable id: String,
+    ): ResponseEntity<Void> {
         MDC.put("customerId", id)
         deleteCustomer.delete(id)
         return ResponseEntity.noContent().build()

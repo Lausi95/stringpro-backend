@@ -9,7 +9,6 @@ import com.stringpro.application.ports.`in`.customer.ListCustomersQuery
 import com.stringpro.application.ports.`in`.customer.UpdateCustomerCommand
 import com.stringpro.application.ports.out.customer.CustomerRepository
 import io.mockk.every
-import java.time.Instant
 import io.mockk.mockk
 import io.mockk.slot
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -17,9 +16,9 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Instant
 
 class CustomerServiceTest {
-
     private val customerRepository: CustomerRepository = mockk()
     private val service = CustomerService(customerRepository)
 
@@ -29,9 +28,10 @@ class CustomerServiceTest {
         every { customerRepository.findByEmail("tom@example.com") } returns null
         every { customerRepository.save(capture(slot)) } answers { slot.captured }
 
-        val result = service.create(
-            CreateCustomerCommand("Tom", "Lausmann", "tom@example.com", "+49123456", null),
-        )
+        val result =
+            service.create(
+                CreateCustomerCommand("Tom", "Lausmann", "tom@example.com", "+49123456", null),
+            )
 
         assertNotNull(result.id)
         assertEquals("Tom", result.firstName)
@@ -82,10 +82,11 @@ class CustomerServiceTest {
         every { customerRepository.findByEmail("new@example.com") } returns null
         every { customerRepository.save(capture(slot)) } answers { slot.captured }
 
-        val result = service.update(
-            "id-1",
-            UpdateCustomerCommand("Tom", "Lausmann", "new@example.com", "+49", null),
-        )
+        val result =
+            service.update(
+                "id-1",
+                UpdateCustomerCommand("Tom", "Lausmann", "new@example.com", "+49", null),
+            )
 
         assertEquals("new@example.com", result.email)
     }
@@ -96,10 +97,11 @@ class CustomerServiceTest {
         every { customerRepository.findById("id-1") } returns aCustomer(id = "id-1")
         every { customerRepository.save(capture(slot)) } answers { slot.captured }
 
-        val result = service.update(
-            "id-1",
-            UpdateCustomerCommand("Tom", "Updated", "tom@example.com", "+49", null),
-        )
+        val result =
+            service.update(
+                "id-1",
+                UpdateCustomerCommand("Tom", "Updated", "tom@example.com", "+49", null),
+            )
 
         assertEquals("Updated", result.lastName)
     }
@@ -135,7 +137,10 @@ class CustomerServiceTest {
         assertThrows<CustomerNotFoundException> { service.delete("unknown") }
     }
 
-    private fun aCustomer(id: String = "id-1", email: String = "tom@example.com") = Customer(
+    private fun aCustomer(
+        id: String = "id-1",
+        email: String = "tom@example.com",
+    ) = Customer(
         id = id,
         firstName = "Tom",
         lastName = "Lausmann",

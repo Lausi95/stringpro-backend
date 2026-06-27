@@ -22,7 +22,6 @@ import java.util.UUID
 class ReelService(
     private val reelRepository: ReelRepository,
 ) : CreateReelUseCase, GetReelUseCase, ListReelsUseCase, UpdateReelUseCase, ChangeReelStateUseCase, DeleteReelUseCase {
-
     override fun create(command: CreateReelCommand): Reel =
         reelRepository.save(
             Reel(
@@ -41,8 +40,7 @@ class ReelService(
             ),
         )
 
-    override fun get(id: String): Reel =
-        reelRepository.findById(id) ?: throw ReelNotFoundException(id)
+    override fun get(id: String): Reel = reelRepository.findById(id) ?: throw ReelNotFoundException(id)
 
     override fun list(query: ListReelsQuery): List<Reel> =
         if (query.state == null) {
@@ -51,7 +49,10 @@ class ReelService(
             reelRepository.findByState(query.state)
         }
 
-    override fun update(id: String, command: UpdateReelCommand): Reel {
+    override fun update(
+        id: String,
+        command: UpdateReelCommand,
+    ): Reel {
         val existing = reelRepository.findById(id) ?: throw ReelNotFoundException(id)
         return reelRepository.save(
             existing.copy(
@@ -68,7 +69,10 @@ class ReelService(
         )
     }
 
-    override fun changeState(id: String, command: ChangeReelStateCommand): Reel {
+    override fun changeState(
+        id: String,
+        command: ChangeReelStateCommand,
+    ): Reel {
         val existing = reelRepository.findById(id) ?: throw ReelNotFoundException(id)
         return reelRepository.save(existing.copy(state = command.targetState))
     }

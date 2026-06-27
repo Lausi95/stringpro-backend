@@ -10,18 +10,18 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class OpenApiConfig {
-
     @Bean
-    fun openApi(): OpenAPI = OpenAPI()
-        .info(Info().title("Stringpro API").version("1.0.0"))
-        .components(
-            Components().addSecuritySchemes(
-                "bearer-jwt",
-                SecurityScheme()
-                    .type(SecurityScheme.Type.HTTP)
-                    .scheme("bearer")
-                    .bearerFormat("JWT"),
-            ),
-        )
-        .addSecurityItem(SecurityRequirement().addList("bearer-jwt"))
+    fun openApi(): OpenAPI =
+        OpenAPI()
+            .info(Info().title("Stringpro API").version("1.0.0"))
+            .components(
+                Components().addSecuritySchemes(
+                    "bearer-jwt",
+                    SecurityScheme()
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("JWT"),
+                ),
+            )
+            .addSecurityItem(SecurityRequirement().addList("bearer-jwt"))
 }

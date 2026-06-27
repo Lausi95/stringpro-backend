@@ -30,15 +30,20 @@ import java.time.Instant
 @WebMvcTest(RacketController::class)
 @Import(SecurityConfig::class, GlobalExceptionHandler::class)
 class RacketControllerTest {
-
     @Autowired private lateinit var mvc: MockMvc
+
     @Autowired private lateinit var objectMapper: ObjectMapper
 
     @MockkBean private lateinit var jwtDecoder: JwtDecoder
+
     @MockkBean private lateinit var createRacket: CreateRacketUseCase
+
     @MockkBean private lateinit var getRacket: GetRacketUseCase
+
     @MockkBean private lateinit var listRackets: ListRacketsUseCase
+
     @MockkBean private lateinit var updateRacket: UpdateRacketUseCase
+
     @MockkBean private lateinit var deleteRacket: DeleteRacketUseCase
 
     @Test
@@ -171,34 +176,37 @@ class RacketControllerTest {
         }.andExpect { status { isUnauthorized() } }
     }
 
-    private fun aRacket() = Racket(
-        id = "id-1",
-        customerId = "cust-1",
-        brand = "Babolat",
-        model = "Pure Aero",
-        headSize = 645,
-        stringMains = 16,
-        stringCrosses = 19,
-        notes = null,
-        createdAt = Instant.EPOCH,
-    )
+    private fun aRacket() =
+        Racket(
+            id = "id-1",
+            customerId = "cust-1",
+            brand = "Babolat",
+            model = "Pure Aero",
+            headSize = 645,
+            stringMains = 16,
+            stringCrosses = 19,
+            notes = null,
+            createdAt = Instant.EPOCH,
+        )
 
-    private fun aCreateRequest() = CreateRacketRequest(
-        customerId = "cust-1",
-        brand = "Babolat",
-        model = "Pure Aero",
-        headSize = 645,
-        stringMains = 16,
-        stringCrosses = 19,
-        notes = null,
-    )
+    private fun aCreateRequest() =
+        CreateRacketRequest(
+            customerId = "cust-1",
+            brand = "Babolat",
+            model = "Pure Aero",
+            headSize = 645,
+            stringMains = 16,
+            stringCrosses = 19,
+            notes = null,
+        )
 
-    private fun aUpdateRequest() = UpdateRacketRequest(
-        brand = "Babolat",
-        model = "Pure Aero",
-        headSize = 645,
-        stringMains = 16,
-        stringCrosses = 19,
-        notes = null,
-    )
+    private fun aUpdateRequest() =
+        UpdateRacketRequest(
+            brand = "Babolat",
+            model = "Pure Aero",
+            headSize = 645,
+            stringMains = 16,
+            stringCrosses = 19,
+            notes = null,
+        )
 }

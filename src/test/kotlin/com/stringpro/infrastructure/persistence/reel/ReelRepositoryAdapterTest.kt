@@ -17,7 +17,6 @@ import java.util.UUID
 
 @DataMongoTest
 class ReelRepositoryAdapterTest {
-
     @Autowired private lateinit var mongoRepository: ReelMongoRepository
     private lateinit var adapter: ReelRepositoryAdapter
 
@@ -87,18 +86,19 @@ class ReelRepositoryAdapterTest {
         assertEquals(0, result.size)
     }
 
-    private fun aReel(state: ReelState = ReelState.NEW) = Reel(
-        id = UUID.randomUUID().toString(),
-        brand = "Luxilon",
-        model = "ALU Power",
-        material = Material.POLYESTER,
-        gaugeHundredthsMm = 125,
-        reelLengthMeters = 200,
-        costCents = 12000,
-        stringFeeCents = 2500,
-        metersPerJob = 11,
-        purchaseDate = LocalDate.of(2026, 1, 15),
-        state = state,
-        createdAt = Instant.now(),
-    )
+    private fun aReel(state: ReelState = ReelState.NEW) =
+        Reel(
+            id = UUID.randomUUID().toString(),
+            brand = "Luxilon",
+            model = "ALU Power",
+            material = Material.POLYESTER,
+            gaugeHundredthsMm = 125,
+            reelLengthMeters = 200,
+            costCents = 12000,
+            stringFeeCents = 2500,
+            metersPerJob = 11,
+            purchaseDate = LocalDate.of(2026, 1, 15),
+            state = state,
+            createdAt = Instant.now(),
+        )
 }

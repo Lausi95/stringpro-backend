@@ -1,0 +1,7 @@
+root = true
+
+[*.{kt,kts}]
+# Inbound ports live in `application.ports.in` packages. `in` is a Kotlin reserved
+# word, so the segment is backtick-escaped — which trips ktlint's package-name rule.
+# The package layout is a deliberate Clean Architecture convention, so disable the rule.
+ktlint_standard_package-name = disabled

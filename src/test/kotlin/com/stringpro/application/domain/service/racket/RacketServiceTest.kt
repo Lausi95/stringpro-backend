@@ -21,7 +21,6 @@ import org.junit.jupiter.api.assertThrows
 import java.time.Instant
 
 class RacketServiceTest {
-
     private val racketRepository: RacketRepository = mockk()
     private val customerRepository: CustomerRepository = mockk()
     private val service = RacketService(racketRepository, customerRepository)
@@ -32,9 +31,10 @@ class RacketServiceTest {
         every { customerRepository.findById("cust-1") } returns aCustomer()
         every { racketRepository.save(capture(slot)) } answers { slot.captured }
 
-        val result = service.create(
-            CreateRacketCommand("cust-1", "Babolat", "Pure Aero", 645, 16, 19, null),
-        )
+        val result =
+            service.create(
+                CreateRacketCommand("cust-1", "Babolat", "Pure Aero", 645, 16, 19, null),
+            )
 
         assertNotNull(result.id)
         assertEquals("cust-1", result.customerId)
@@ -95,10 +95,11 @@ class RacketServiceTest {
         every { racketRepository.findById("id-1") } returns aRacket(id = "id-1")
         every { racketRepository.save(capture(slot)) } answers { slot.captured }
 
-        val result = service.update(
-            "id-1",
-            UpdateRacketCommand("Wilson", "Blade", 626, 18, 20, "stiffened"),
-        )
+        val result =
+            service.update(
+                "id-1",
+                UpdateRacketCommand("Wilson", "Blade", 626, 18, 20, "stiffened"),
+            )
 
         assertEquals("Wilson", result.brand)
         assertEquals("Blade", result.model)
@@ -114,10 +115,11 @@ class RacketServiceTest {
         every { racketRepository.findById("id-1") } returns aRacket(id = "id-1", customerId = "cust-1")
         every { racketRepository.save(capture(slot)) } answers { slot.captured }
 
-        val result = service.update(
-            "id-1",
-            UpdateRacketCommand("Wilson", "Blade", 626, 18, 20, null),
-        )
+        val result =
+            service.update(
+                "id-1",
+                UpdateRacketCommand("Wilson", "Blade", 626, 18, 20, null),
+            )
 
         assertEquals("cust-1", result.customerId)
     }
@@ -149,17 +151,21 @@ class RacketServiceTest {
         assertThrows<RacketNotFoundException> { service.delete("unknown") }
     }
 
-    private fun aCustomer(id: String = "cust-1") = Customer(
-        id = id,
-        firstName = "Tom",
-        lastName = "Lausmann",
-        email = "tom@example.com",
-        phoneNumber = "+49123456",
-        notes = null,
-        createdAt = Instant.now(),
-    )
+    private fun aCustomer(id: String = "cust-1") =
+        Customer(
+            id = id,
+            firstName = "Tom",
+            lastName = "Lausmann",
+            email = "tom@example.com",
+            phoneNumber = "+49123456",
+            notes = null,
+            createdAt = Instant.now(),
+        )
 
-    private fun aRacket(id: String = "id-1", customerId: String = "cust-1") = Racket(
+    private fun aRacket(
+        id: String = "id-1",
+        customerId: String = "cust-1",
+    ) = Racket(
         id = id,
         customerId = customerId,
         brand = "Babolat",

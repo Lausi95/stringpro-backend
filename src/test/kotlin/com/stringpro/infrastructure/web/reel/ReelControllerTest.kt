@@ -38,16 +38,22 @@ import java.time.LocalDate
 @WebMvcTest(ReelController::class)
 @Import(SecurityConfig::class, GlobalExceptionHandler::class)
 class ReelControllerTest {
-
     @Autowired private lateinit var mvc: MockMvc
+
     @Autowired private lateinit var objectMapper: ObjectMapper
 
     @MockkBean private lateinit var jwtDecoder: JwtDecoder
+
     @MockkBean private lateinit var createReel: CreateReelUseCase
+
     @MockkBean private lateinit var getReel: GetReelUseCase
+
     @MockkBean private lateinit var listReels: ListReelsUseCase
+
     @MockkBean private lateinit var updateReel: UpdateReelUseCase
+
     @MockkBean private lateinit var changeReelState: ChangeReelStateUseCase
+
     @MockkBean private lateinit var deleteReel: DeleteReelUseCase
 
     @Test
@@ -261,42 +267,45 @@ class ReelControllerTest {
         }.andExpect { status { isUnauthorized() } }
     }
 
-    private fun aReel(state: ReelState = ReelState.NEW) = Reel(
-        id = "id-1",
-        brand = "Luxilon",
-        model = "ALU Power",
-        material = Material.POLYESTER,
-        gaugeHundredthsMm = 125,
-        reelLengthMeters = 200,
-        costCents = 12000,
-        stringFeeCents = 2500,
-        metersPerJob = 11,
-        purchaseDate = LocalDate.of(2026, 1, 15),
-        state = state,
-        createdAt = Instant.EPOCH,
-    )
+    private fun aReel(state: ReelState = ReelState.NEW) =
+        Reel(
+            id = "id-1",
+            brand = "Luxilon",
+            model = "ALU Power",
+            material = Material.POLYESTER,
+            gaugeHundredthsMm = 125,
+            reelLengthMeters = 200,
+            costCents = 12000,
+            stringFeeCents = 2500,
+            metersPerJob = 11,
+            purchaseDate = LocalDate.of(2026, 1, 15),
+            state = state,
+            createdAt = Instant.EPOCH,
+        )
 
-    private fun aCreateRequest() = CreateReelRequest(
-        brand = "Luxilon",
-        model = "ALU Power",
-        material = Material.POLYESTER,
-        gauge = BigDecimal("1.25"),
-        reelLengthMeters = 200,
-        cost = BigDecimal("120.00"),
-        stringFee = BigDecimal("25.00"),
-        metersPerJob = 11,
-        purchaseDate = LocalDate.of(2026, 1, 15),
-    )
+    private fun aCreateRequest() =
+        CreateReelRequest(
+            brand = "Luxilon",
+            model = "ALU Power",
+            material = Material.POLYESTER,
+            gauge = BigDecimal("1.25"),
+            reelLengthMeters = 200,
+            cost = BigDecimal("120.00"),
+            stringFee = BigDecimal("25.00"),
+            metersPerJob = 11,
+            purchaseDate = LocalDate.of(2026, 1, 15),
+        )
 
-    private fun aUpdateRequest() = UpdateReelRequest(
-        brand = "Luxilon",
-        model = "ALU Power",
-        material = Material.POLYESTER,
-        gauge = BigDecimal("1.25"),
-        reelLengthMeters = 200,
-        cost = BigDecimal("120.00"),
-        stringFee = BigDecimal("25.00"),
-        metersPerJob = 11,
-        purchaseDate = LocalDate.of(2026, 1, 15),
-    )
+    private fun aUpdateRequest() =
+        UpdateReelRequest(
+            brand = "Luxilon",
+            model = "ALU Power",
+            material = Material.POLYESTER,
+            gauge = BigDecimal("1.25"),
+            reelLengthMeters = 200,
+            cost = BigDecimal("120.00"),
+            stringFee = BigDecimal("25.00"),
+            metersPerJob = 11,
+            purchaseDate = LocalDate.of(2026, 1, 15),
+        )
 }

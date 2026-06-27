@@ -22,7 +22,6 @@ class RacketService(
     private val racketRepository: RacketRepository,
     private val customerRepository: CustomerRepository,
 ) : CreateRacketUseCase, GetRacketUseCase, ListRacketsUseCase, UpdateRacketUseCase, DeleteRacketUseCase {
-
     override fun create(command: CreateRacketCommand): Racket {
         customerRepository.findById(command.customerId) ?: throw CustomerNotFoundException(command.customerId)
         return racketRepository.save(
@@ -40,13 +39,14 @@ class RacketService(
         )
     }
 
-    override fun get(id: String): Racket =
-        racketRepository.findById(id) ?: throw RacketNotFoundException(id)
+    override fun get(id: String): Racket = racketRepository.findById(id) ?: throw RacketNotFoundException(id)
 
-    override fun list(query: ListRacketsQuery): List<Racket> =
-        racketRepository.findByCustomerId(query.customerId)
+    override fun list(query: ListRacketsQuery): List<Racket> = racketRepository.findByCustomerId(query.customerId)
 
-    override fun update(id: String, command: UpdateRacketCommand): Racket {
+    override fun update(
+        id: String,
+        command: UpdateRacketCommand,
+    ): Racket {
         val existing = racketRepository.findById(id) ?: throw RacketNotFoundException(id)
         return racketRepository.save(
             existing.copy(

@@ -13,7 +13,6 @@ import java.util.UUID
 
 @DataMongoTest
 class CustomerRepositoryAdapterTest {
-
     @Autowired private lateinit var mongoRepository: CustomerMongoRepository
     private lateinit var adapter: CustomerRepositoryAdapter
 

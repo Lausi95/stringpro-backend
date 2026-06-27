@@ -21,7 +21,6 @@ import java.util.UUID
 class CustomerService(
     private val customerRepository: CustomerRepository,
 ) : CreateCustomerUseCase, GetCustomerUseCase, ListCustomersUseCase, UpdateCustomerUseCase, DeleteCustomerUseCase {
-
     override fun create(command: CreateCustomerCommand): Customer {
         customerRepository.findByEmail(command.email)?.let {
             throw EmailAlreadyExistsException(command.email)
@@ -39,13 +38,14 @@ class CustomerService(
         )
     }
 
-    override fun get(id: String): Customer =
-        customerRepository.findById(id) ?: throw CustomerNotFoundException(id)
+    override fun get(id: String): Customer = customerRepository.findById(id) ?: throw CustomerNotFoundException(id)
 
-    override fun list(query: ListCustomersQuery): PageResult<Customer> =
-        customerRepository.findAll(query.page, query.size, query.name)
+    override fun list(query: ListCustomersQuery): PageResult<Customer> = customerRepository.findAll(query.page, query.size, query.name)
 
-    override fun update(id: String, command: UpdateCustomerCommand): Customer {
+    override fun update(
+        id: String,
+        command: UpdateCustomerCommand,
+    ): Customer {
         val existing = customerRepository.findById(id) ?: throw CustomerNotFoundException(id)
         if (existing.email != command.email) {
             customerRepository.findByEmail(command.email)?.let {
