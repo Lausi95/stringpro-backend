@@ -1,5 +1,6 @@
 package com.stringpro.application.domain.service.reel
 
+import com.stringpro.application.domain.model.PageResult
 import com.stringpro.application.domain.model.reel.Material
 import com.stringpro.application.domain.model.reel.Reel
 import com.stringpro.application.domain.model.reel.ReelNotFoundException
@@ -72,23 +73,24 @@ class ReelServiceTest {
     }
 
     @Test
-    fun `should list all reels when no state filter`() {
-        every { reelRepository.findAll() } returns listOf(aReel(), aReel(id = "id-2"))
+    fun `should delegate to repository with pagination and no state filter`() {
+        every { reelRepository.findAll(0, 20, null) } returns PageResult(listOf(aReel(), aReel(id = "id-2")), 2L, 1, 0, 20)
 
-        val result = service.list(ListReelsQuery(state = null))
+        val result = service.list(ListReelsQuery(page = 0, size = 20, state = null))
 
-        assertEquals(2, result.size)
-        verify(exactly = 0) { reelRepository.findByState(any()) }
+        assertEquals(2, result.content.size)
+        assertEquals(2L, result.totalElements)
+        verify { reelRepository.findAll(0, 20, null) }
     }
 
     @Test
-    fun `should list reels filtered by state`() {
-        every { reelRepository.findByState(ReelState.IN_USE) } returns listOf(aReel(state = ReelState.IN_USE))
+    fun `should delegate to repository with pagination and state filter`() {
+        every { reelRepository.findAll(0, 20, ReelState.IN_USE) } returns PageResult(listOf(aReel(state = ReelState.IN_USE)), 1L, 1, 0, 20)
 
-        val result = service.list(ListReelsQuery(state = ReelState.IN_USE))
+        val result = service.list(ListReelsQuery(page = 0, size = 20, state = ReelState.IN_USE))
 
-        assertEquals(1, result.size)
-        verify(exactly = 0) { reelRepository.findAll() }
+        assertEquals(1, result.content.size)
+        verify { reelRepository.findAll(0, 20, ReelState.IN_USE) }
     }
 
     @Test

@@ -58,9 +58,10 @@ class ReelRepositoryAdapterTest {
         val toDelete = adapter.save(aReel())
         adapter.save(toDelete.copy(deletedAt = Instant.now()))
 
-        val result = adapter.findAll()
+        val result = adapter.findAll(0, 20, null)
 
-        assertEquals(1, result.size)
+        assertEquals(1, result.totalElements)
+        assertEquals(1, result.content.size)
     }
 
     @Test
@@ -71,34 +72,68 @@ class ReelRepositoryAdapterTest {
         val toDelete = adapter.save(aReel(state = ReelState.IN_USE))
         adapter.save(toDelete.copy(deletedAt = Instant.now()))
 
-        val result = adapter.findByState(ReelState.IN_USE)
+        val result = adapter.findAll(0, 20, ReelState.IN_USE)
 
-        assertEquals(2, result.size)
-        assertTrue(result.all { it.state == ReelState.IN_USE })
+        assertEquals(2, result.totalElements)
+        assertTrue(result.content.all { it.state == ReelState.IN_USE })
     }
 
     @Test
-    fun `should return empty list when no reels match state`() {
+    fun `should return empty page when no reels match state`() {
         adapter.save(aReel(state = ReelState.NEW))
 
-        val result = adapter.findByState(ReelState.USED_UP)
+        val result = adapter.findAll(0, 20, ReelState.USED_UP)
 
-        assertEquals(0, result.size)
+        assertEquals(0, result.totalElements)
+        assertEquals(0, result.content.size)
     }
 
-    private fun aReel(state: ReelState = ReelState.NEW) =
-        Reel(
-            id = UUID.randomUUID().toString(),
-            brand = "Luxilon",
-            model = "ALU Power",
-            material = Material.POLYESTER,
-            gaugeHundredthsMm = 125,
-            reelLengthMeters = 200,
-            costCents = 12000,
-            stringFeeCents = 2500,
-            metersPerJob = 11,
-            purchaseDate = LocalDate.of(2026, 1, 15),
-            state = state,
-            createdAt = Instant.now(),
+    @Test
+    fun `should sort reels by createdAt descending`() {
+        adapter.save(aReel(createdAt = Instant.parse("2026-01-01T00:00:00Z")))
+        adapter.save(aReel(createdAt = Instant.parse("2026-03-01T00:00:00Z")))
+        adapter.save(aReel(createdAt = Instant.parse("2026-02-01T00:00:00Z")))
+
+        val result = adapter.findAll(0, 20, null)
+
+        assertEquals(
+            listOf(
+                Instant.parse("2026-03-01T00:00:00Z"),
+                Instant.parse("2026-02-01T00:00:00Z"),
+                Instant.parse("2026-01-01T00:00:00Z"),
+            ),
+            result.content.map { it.createdAt },
         )
+    }
+
+    @Test
+    fun `should respect page and size boundaries`() {
+        repeat(3) { adapter.save(aReel()) }
+
+        val firstPage = adapter.findAll(0, 2, null)
+        val secondPage = adapter.findAll(1, 2, null)
+
+        assertEquals(3, firstPage.totalElements)
+        assertEquals(2, firstPage.totalPages)
+        assertEquals(2, firstPage.content.size)
+        assertEquals(1, secondPage.content.size)
+    }
+
+    private fun aReel(
+        state: ReelState = ReelState.NEW,
+        createdAt: Instant = Instant.now(),
+    ) = Reel(
+        id = UUID.randomUUID().toString(),
+        brand = "Luxilon",
+        model = "ALU Power",
+        material = Material.POLYESTER,
+        gaugeHundredthsMm = 125,
+        reelLengthMeters = 200,
+        costCents = 12000,
+        stringFeeCents = 2500,
+        metersPerJob = 11,
+        purchaseDate = LocalDate.of(2026, 1, 15),
+        state = state,
+        createdAt = createdAt,
+    )
 }

@@ -72,11 +72,13 @@ class ReelController(
     }
 
     @GetMapping
-    @Operation(summary = "List string reels, optionally filtered by state")
+    @Operation(summary = "List string reels (paginated), optionally filtered by state")
     @ApiResponse(responseCode = "200", description = "OK")
     fun list(
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "20") size: Int,
         @RequestParam(required = false) state: ReelState?,
-    ): List<ReelResponse> = listReels.list(ListReelsQuery(state)).map { it.toResponse() }
+    ): PagedReelResponse = listReels.list(ListReelsQuery(page, size, state)).toResponse()
 
     @GetMapping("/{id}")
     @Operation(summary = "Get a string reel by ID")

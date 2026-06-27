@@ -1,6 +1,7 @@
 package com.stringpro.infrastructure.web.reel
 
 import com.ninjasquad.springmockk.MockkBean
+import com.stringpro.application.domain.model.PageResult
 import com.stringpro.application.domain.model.reel.Material
 import com.stringpro.application.domain.model.reel.Reel
 import com.stringpro.application.domain.model.reel.ReelNotFoundException
@@ -137,23 +138,43 @@ class ReelControllerTest {
     }
 
     @Test
-    fun `should list all reels when no state filter`() {
+    fun `should list reels with pagination and no state filter`() {
         val slot = slot<ListReelsQuery>()
-        every { listReels.list(capture(slot)) } returns listOf(aReel())
+        every { listReels.list(capture(slot)) } returns PageResult(listOf(aReel()), 1L, 1, 0, 20)
 
         mvc.get("/reels") {
             with(jwt())
         }.andExpect {
             status { isOk() }
-            jsonPath("$[0].id") { value("id-1") }
+            jsonPath("$.content[0].id") { value("id-1") }
+            jsonPath("$.totalElements") { value(1) }
+            jsonPath("$.page") { value(0) }
         }
         assertEquals(null, slot.captured.state)
+        assertEquals(0, slot.captured.page)
+        assertEquals(20, slot.captured.size)
+    }
+
+    @Test
+    fun `should pass page and size query params through to the query`() {
+        val slot = slot<ListReelsQuery>()
+        every { listReels.list(capture(slot)) } returns PageResult(emptyList(), 0L, 0, 2, 5)
+
+        mvc.get("/reels") {
+            with(jwt())
+            param("page", "2")
+            param("size", "5")
+        }.andExpect {
+            status { isOk() }
+        }
+        assertEquals(2, slot.captured.page)
+        assertEquals(5, slot.captured.size)
     }
 
     @Test
     fun `should list reels filtered by state`() {
         val slot = slot<ListReelsQuery>()
-        every { listReels.list(capture(slot)) } returns listOf(aReel(state = ReelState.IN_USE))
+        every { listReels.list(capture(slot)) } returns PageResult(listOf(aReel(state = ReelState.IN_USE)), 1L, 1, 0, 20)
 
         mvc.get("/reels") {
             with(jwt())

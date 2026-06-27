@@ -1,5 +1,6 @@
 package com.stringpro.infrastructure.web.reel
 
+import com.stringpro.application.domain.model.PageResult
 import com.stringpro.application.domain.model.reel.Material
 import com.stringpro.application.domain.model.reel.Reel
 import com.stringpro.application.domain.model.reel.ReelState
@@ -72,6 +73,23 @@ data class ReelResponse(
     val state: ReelState,
     val createdAt: Instant,
 )
+
+data class PagedReelResponse(
+    val content: List<ReelResponse>,
+    val totalElements: Long,
+    val totalPages: Int,
+    val page: Int,
+    val size: Int,
+)
+
+fun PageResult<Reel>.toResponse() =
+    PagedReelResponse(
+        content = content.map { it.toResponse() },
+        totalElements = totalElements,
+        totalPages = totalPages,
+        page = page,
+        size = size,
+    )
 
 fun Reel.toResponse() =
     ReelResponse(

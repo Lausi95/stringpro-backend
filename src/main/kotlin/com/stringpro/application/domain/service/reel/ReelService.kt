@@ -1,5 +1,6 @@
 package com.stringpro.application.domain.service.reel
 
+import com.stringpro.application.domain.model.PageResult
 import com.stringpro.application.domain.model.reel.Reel
 import com.stringpro.application.domain.model.reel.ReelNotFoundException
 import com.stringpro.application.domain.model.reel.ReelState
@@ -42,12 +43,7 @@ class ReelService(
 
     override fun get(id: String): Reel = reelRepository.findById(id) ?: throw ReelNotFoundException(id)
 
-    override fun list(query: ListReelsQuery): List<Reel> =
-        if (query.state == null) {
-            reelRepository.findAll()
-        } else {
-            reelRepository.findByState(query.state)
-        }
+    override fun list(query: ListReelsQuery): PageResult<Reel> = reelRepository.findAll(query.page, query.size, query.state)
 
     override fun update(
         id: String,
