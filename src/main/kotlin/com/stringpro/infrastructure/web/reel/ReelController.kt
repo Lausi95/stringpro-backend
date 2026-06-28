@@ -11,6 +11,7 @@ import com.stringpro.application.ports.`in`.reel.ListReelsQuery
 import com.stringpro.application.ports.`in`.reel.ListReelsUseCase
 import com.stringpro.application.ports.`in`.reel.UpdateReelCommand
 import com.stringpro.application.ports.`in`.reel.UpdateReelUseCase
+import com.stringpro.infrastructure.web.eurosToCents
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag

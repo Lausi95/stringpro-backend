@@ -4,6 +4,7 @@ import com.stringpro.application.domain.model.PageResult
 import com.stringpro.application.domain.model.reel.Material
 import com.stringpro.application.domain.model.reel.Reel
 import com.stringpro.application.domain.model.reel.ReelState
+import com.stringpro.infrastructure.web.centsToEuros
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.Digits
 import jakarta.validation.constraints.Min
@@ -107,11 +108,7 @@ fun Reel.toResponse() =
         createdAt = createdAt,
     )
 
-// --- Unit conversions at the API edge ---
-
-fun eurosToCents(euros: BigDecimal): Long = euros.movePointRight(2).setScale(0, RoundingMode.HALF_UP).longValueExact()
-
-fun centsToEuros(cents: Long): BigDecimal = BigDecimal.valueOf(cents).movePointLeft(2)
+// --- Unit conversions at the API edge (euro <-> cents live in the shared MoneyConversions.kt) ---
 
 fun decimalMmToHundredths(mm: BigDecimal): Int = mm.movePointRight(2).setScale(0, RoundingMode.HALF_UP).intValueExact()
 

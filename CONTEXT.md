@@ -49,3 +49,8 @@ _Avoid_: Stage (that is Job-only), status, phase
 
 **Material**: What a String Reel is physically made of — one of Polyester, Natural Gut, Multifilament, Synthetic Gut. A reel is a single material; a two-string ("hybrid") setup is a Job-level combination of two Reels, never a material.
 _Avoid_: Hybrid (as a material), composition
+
+### Configuration
+
+**Settings**: The single, global configuration for the installation. Holds the Service Fee applied to every Job, plus the Stringer's invoicing identity — full name, email, IBAN, and address. Exactly one Settings exists per installation; it is never created or deleted, only read and updated. Before the Stringer has saved anything, Settings reads back as defaults (Service Fee of zero, blank identity).
+_Avoid_: Config, preferences, profile
