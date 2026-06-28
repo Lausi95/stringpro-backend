@@ -30,7 +30,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commits
 
-Use conventional commit style on the current branch (e.g. `feat:`, `fix:`, `refactor:`, `test:`, `chore:`).
+Always commit on the current branch — never create or switch to a new branch to commit.
+
+Use conventional commit style (e.g. `feat:`, `fix:`, `refactor:`, `test:`, `chore:`).
 
 Before running `git commit`, always show the proposed commit message and wait for approval.
 
@@ -42,12 +44,19 @@ Use these exact terms everywhere (code, logs, comments, API responses). See `CON
 |---|---|---|
 | **Job** | Unit of work — a Racket brought in to be strung | Order, request, ticket |
 | **Stage** | Lifecycle state of a Job: Queued → In Progress → Ready → Done → Paid | Status, phase, step |
-| **Stringer** | The operator of the app | User, admin |
+| **Stringer** | The operator of the app (one per installation) | User, admin |
 | **Customer** | Person who brings Rackets in | Client, player |
 | **Racket** | Tennis racket owned by a Customer | Equipment, item |
-| **Service Fee** | Labor charge per Job | Labor cost, stringing fee |
-| **String Fee** | Material cost for the string product | Material cost, string cost |
-| **String** | A string product in inventory | Product, cord |
+| **String Reel** (short: **Reel**) | Physical reel of string in inventory — the inventory unit itself | String, product, item, cord, spool |
+| **Reel State** | Where a Reel is in its life: New → In Use → Used Up (set manually, moves any direction) | Stage (Job-only), status |
+| **Material** | What a Reel is made of: Polyester, Natural Gut, Multifilament, Synthetic Gut | Hybrid (as a material), composition |
+| **Service Fee** | Labor charge per Job (lives in Settings) | Labor cost, stringing fee |
+| **String Fee** | Customer-facing material charge, sourced from the Reel | Material cost, string cost |
+| **Settings** | Single global config: Service Fee + Stringer's invoicing identity | Config, preferences, profile |
+
+> **String** (singular) is retired — it previously meant a string-product catalog entry, now superseded by **String Reel**.
+
+**Implemented aggregates:** `customer`, `racket`, `reel`, `settings`. **Job** and **Stage** are part of the domain language but not yet built — when you implement them, follow the same per-aggregate package layout.
 
 ## Architecture
 
