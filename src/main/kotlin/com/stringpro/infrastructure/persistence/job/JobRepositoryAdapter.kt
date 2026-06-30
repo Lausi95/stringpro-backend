@@ -31,6 +31,7 @@ class JobRepositoryAdapter(
         customerId: String?,
         racketId: String?,
         reelId: String?,
+        fullyPaid: Boolean?,
     ): PageResult<Job> {
         val filters = mutableListOf(Criteria.where("deletedAt").isNull)
         stage?.let { filters += Criteria.where("stage").isEqualTo(it) }
@@ -43,6 +44,7 @@ class JobRepositoryAdapter(
                     Criteria.where("crossesReelId").isEqualTo(it),
                 )
         }
+        fullyPaid?.let { filters += Criteria.where("fullyPaid").isEqualTo(it) }
         val criteria = Criteria().andOperator(*filters.toTypedArray())
 
         val totalElements = mongoTemplate.count(Query(criteria), JobDocument::class.java)
@@ -82,6 +84,8 @@ class JobRepositoryAdapter(
             serviceFeeCents = serviceFeeCents,
             stage = stage,
             createdAt = createdAt,
+            amountPaidCents = amountPaidCents,
+            fullyPaid = fullyPaid,
             deletedAt = deletedAt,
         )
 
@@ -112,6 +116,8 @@ class JobRepositoryAdapter(
             serviceFeeCents = serviceFeeCents,
             stage = stage,
             createdAt = createdAt,
+            amountPaidCents = amountPaidCents,
+            fullyPaid = fullyPaid,
             deletedAt = deletedAt,
         )
 

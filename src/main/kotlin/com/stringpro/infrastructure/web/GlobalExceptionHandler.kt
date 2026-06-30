@@ -6,6 +6,8 @@ import com.stringpro.application.domain.model.job.InvalidStageTransitionExceptio
 import com.stringpro.application.domain.model.job.InvalidStringSetupException
 import com.stringpro.application.domain.model.job.JobNotFoundException
 import com.stringpro.application.domain.model.job.RacketNotOwnedByCustomerException
+import com.stringpro.application.domain.model.payment.PaymentCustomerMismatchException
+import com.stringpro.application.domain.model.payment.PaymentNotFoundException
 import com.stringpro.application.domain.model.racket.RacketNotFoundException
 import com.stringpro.application.domain.model.reel.ReelNotFoundException
 import org.springframework.http.HttpStatus
@@ -35,12 +37,20 @@ class GlobalExceptionHandler {
     fun handleJobNotFound(ex: JobNotFoundException): ProblemDetail =
         ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.message ?: "Not found")
 
+    @ExceptionHandler(PaymentNotFoundException::class)
+    fun handlePaymentNotFound(ex: PaymentNotFoundException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.message ?: "Not found")
+
     @ExceptionHandler(EmailAlreadyExistsException::class)
     fun handleConflict(ex: EmailAlreadyExistsException): ProblemDetail =
         ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.message ?: "Conflict")
 
     @ExceptionHandler(RacketNotOwnedByCustomerException::class)
     fun handleRacketNotOwned(ex: RacketNotOwnedByCustomerException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.message ?: "Conflict")
+
+    @ExceptionHandler(PaymentCustomerMismatchException::class)
+    fun handlePaymentCustomerMismatch(ex: PaymentCustomerMismatchException): ProblemDetail =
         ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.message ?: "Conflict")
 
     @ExceptionHandler(InvalidStageTransitionException::class)

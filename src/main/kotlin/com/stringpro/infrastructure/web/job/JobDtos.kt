@@ -109,6 +109,8 @@ data class JobResponse(
     val serviceFee: BigDecimal,
     val totalStringFee: BigDecimal,
     val total: BigDecimal,
+    val amountPaid: BigDecimal,
+    val fullyPaid: Boolean,
     val stage: Stage,
     val createdAt: Instant,
 )
@@ -154,6 +156,8 @@ fun Job.toResponse() =
         serviceFee = centsToEuros(serviceFeeCents),
         totalStringFee = centsToEuros(totalStringFeeCents),
         total = centsToEuros(totalCents),
+        amountPaid = centsToEuros(amountPaidCents),
+        fullyPaid = fullyPaid,
         stage = stage,
         createdAt = createdAt,
     )

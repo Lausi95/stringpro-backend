@@ -11,6 +11,8 @@ import com.stringpro.application.domain.model.job.RacketNotOwnedByCustomerExcept
 import com.stringpro.application.domain.model.job.Stage
 import com.stringpro.application.domain.model.job.StringChoice
 import com.stringpro.application.domain.model.job.StringSourceType
+import com.stringpro.application.domain.model.payment.Payment
+import com.stringpro.application.domain.model.payment.PaymentMethod
 import com.stringpro.application.domain.model.racket.Racket
 import com.stringpro.application.domain.model.racket.RacketNotFoundException
 import com.stringpro.application.domain.model.reel.Material
@@ -24,6 +26,7 @@ import com.stringpro.application.ports.`in`.job.StringChoiceInput
 import com.stringpro.application.ports.`in`.job.UpdateJobCommand
 import com.stringpro.application.ports.out.customer.CustomerRepository
 import com.stringpro.application.ports.out.job.JobRepository
+import com.stringpro.application.ports.out.payment.PaymentRepository
 import com.stringpro.application.ports.out.racket.RacketRepository
 import com.stringpro.application.ports.out.reel.ReelRepository
 import io.mockk.every
@@ -31,8 +34,10 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.Instant
@@ -43,7 +48,9 @@ class JobServiceTest {
     private val customerRepository: CustomerRepository = mockk()
     private val racketRepository: RacketRepository = mockk()
     private val reelRepository: ReelRepository = mockk()
-    private val service = JobService(jobRepository, customerRepository, racketRepository, reelRepository)
+    private val paymentRepository: PaymentRepository = mockk()
+    private val service =
+        JobService(jobRepository, customerRepository, racketRepository, reelRepository, paymentRepository)
 
     @Test
     fun `should create job at ANNOUNCED when references are valid`() {
@@ -173,9 +180,9 @@ class JobServiceTest {
 
     @Test
     fun `should pass list filters through to repository`() {
-        val query = ListJobsQuery(0, 20, Stage.IN_PROGRESS, "cust-1", "rack-1", "reel-1")
+        val query = ListJobsQuery(0, 20, Stage.IN_PROGRESS, "cust-1", "rack-1", "reel-1", false)
         every {
-            jobRepository.findAll(0, 20, Stage.IN_PROGRESS, "cust-1", "rack-1", "reel-1")
+            jobRepository.findAll(0, 20, Stage.IN_PROGRESS, "cust-1", "rack-1", "reel-1", false)
         } returns PageResult(listOf(aJob()), 1L, 1, 0, 20)
 
         val result = service.list(query)
@@ -246,14 +253,49 @@ class JobServiceTest {
     }
 
     @Test
-    fun `should soft delete job`() {
-        val slot = slot<Job>()
+    fun `should soft delete job and cascade soft-delete its payments`() {
+        val jobSlot = slot<Job>()
+        val paymentSlot = slot<Payment>()
         every { jobRepository.findById("job-1") } returns aJob()
-        every { jobRepository.save(capture(slot)) } answers { slot.captured }
+        every { jobRepository.save(capture(jobSlot)) } answers { jobSlot.captured }
+        every { paymentRepository.findAllByJobId("job-1") } returns listOf(aPayment("pay-1"))
+        every { paymentRepository.save(capture(paymentSlot)) } answers { paymentSlot.captured }
 
         service.delete("job-1")
 
-        assertNotNull(slot.captured.deletedAt)
+        assertNotNull(jobSlot.captured.deletedAt)
+        assertNotNull(paymentSlot.captured.deletedAt)
+        verify { paymentRepository.save(any()) }
+    }
+
+    @Test
+    fun `should preserve amount paid and recompute fullyPaid when an update lowers the price`() {
+        val slot = slot<Job>()
+        // Paid 5000; was not fully paid against an old total of 5500.
+        every { jobRepository.findById("job-1") } returns
+            aJob(amountPaidCents = 5000, fullyPaid = false)
+        every { jobRepository.save(capture(slot)) } answers { slot.captured }
+
+        // Update to own string (fee 0) + service fee 2600 -> new total 2600, now overpaid.
+        val result = service.update("job-1", anUpdateCommand(mains = ownInput("Gut")))
+
+        assertEquals(5000, result.amountPaidCents)
+        assertTrue(result.fullyPaid)
+        assertEquals(2600, slot.captured.totalCents)
+    }
+
+    @Test
+    fun `should initialise a new job as unpaid with zero amount paid`() {
+        val slot = slot<Job>()
+        every { customerRepository.findById("cust-1") } returns aCustomer()
+        every { racketRepository.findById("rack-1") } returns aRacket()
+        every { reelRepository.findById("reel-1") } returns aReel()
+        every { jobRepository.save(capture(slot)) } answers { slot.captured }
+
+        val result = service.create(aCreateCommand())
+
+        assertEquals(0, result.amountPaidCents)
+        assertFalse(result.fullyPaid)
     }
 
     @Test
@@ -353,6 +395,8 @@ class JobServiceTest {
         racketId: String = "rack-1",
         stage: Stage = Stage.ANNOUNCED,
         mains: StringChoice = StringChoice.Reel("reel-1", 3000),
+        amountPaidCents: Long = 0,
+        fullyPaid: Boolean = false,
     ) = Job(
         id = id,
         customerId = customerId,
@@ -367,5 +411,17 @@ class JobServiceTest {
         serviceFeeCents = 2500,
         stage = stage,
         createdAt = Instant.now(),
+        amountPaidCents = amountPaidCents,
+        fullyPaid = fullyPaid,
     )
+
+    private fun aPayment(id: String = "pay-1") =
+        Payment(
+            id = id,
+            jobId = "job-1",
+            customerId = "cust-1",
+            amountCents = 1000,
+            method = PaymentMethod.CASH,
+            createdAt = Instant.now(),
+        )
 }

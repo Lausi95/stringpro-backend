@@ -15,4 +15,5 @@ data class ListJobsQuery(
     val customerId: String?,
     val racketId: String?,
     val reelId: String?,
+    val fullyPaid: Boolean?,
 )

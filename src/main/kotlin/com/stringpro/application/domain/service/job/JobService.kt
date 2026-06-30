@@ -24,6 +24,7 @@ import com.stringpro.application.ports.`in`.job.UpdateJobCommand
 import com.stringpro.application.ports.`in`.job.UpdateJobUseCase
 import com.stringpro.application.ports.out.customer.CustomerRepository
 import com.stringpro.application.ports.out.job.JobRepository
+import com.stringpro.application.ports.out.payment.PaymentRepository
 import com.stringpro.application.ports.out.racket.RacketRepository
 import com.stringpro.application.ports.out.reel.ReelRepository
 import org.springframework.stereotype.Service
@@ -36,6 +37,7 @@ class JobService(
     private val customerRepository: CustomerRepository,
     private val racketRepository: RacketRepository,
     private val reelRepository: ReelRepository,
+    private val paymentRepository: PaymentRepository,
 ) : CreateJobUseCase,
     GetJobUseCase,
     ListJobsUseCase,
@@ -85,6 +87,7 @@ class JobService(
             query.customerId,
             query.racketId,
             query.reelId,
+            query.fullyPaid,
         )
 
     override fun update(
@@ -97,6 +100,11 @@ class JobService(
         val mains = resolveStringChoice(command.mains, existing.mainsString)
         val crosses = command.crosses?.let { resolveStringChoice(it, existing.crossesString) }
 
+        // The price may change, so fullyPaid must be re-derived against the new total in the same
+        // copy (a later withAmountPaid would be too late — the copy's init invariant runs first).
+        // amountPaidCents is preserved from the existing Job; only the threshold moves.
+        val newTotalCents = command.serviceFeeCents + mains.feeCents + (crosses?.feeCents ?: 0)
+
         return jobRepository.save(
             existing.copy(
                 dueDate = command.dueDate,
@@ -107,6 +115,7 @@ class JobService(
                 mainsString = mains,
                 crossesString = crosses,
                 serviceFeeCents = command.serviceFeeCents,
+                fullyPaid = existing.amountPaidCents >= newTotalCents,
             ),
         )
     }
@@ -121,7 +130,12 @@ class JobService(
 
     override fun delete(id: String) {
         val existing = jobRepository.findById(id) ?: throw JobNotFoundException(id)
-        jobRepository.save(existing.copy(deletedAt = Instant.now()))
+        val now = Instant.now()
+        jobRepository.save(existing.copy(deletedAt = now))
+        // Cascade: a Payment must never outlive its visible Job.
+        paymentRepository.findAllByJobId(id).forEach { payment ->
+            paymentRepository.save(payment.copy(deletedAt = now))
+        }
     }
 
     private fun requireHybridConsistency(

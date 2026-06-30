@@ -63,6 +63,17 @@ _Avoid_: Hybrid (as a material), composition
 **Hybrid**: A Job whose mains and crosses use different strings, supplied separately. Each side (mains, crosses) is independently either a String Reel or the Customer's Own String — so a hybrid is any combination (Reel + Reel, Reel + Own, Own + Own). A non-hybrid Job uses one string for both sides. (Hybrid refers to the string source per side; tension is always recorded separately for mains and crosses regardless of whether the Job is hybrid.)
 _Avoid_: Hybrid material, mixed
 
+### Payment
+
+**Payment**: A single sum of money received from a Customer toward one Job, recorded with the method it arrived by. A Job may have many Payments (advance, split, or corrected); each Payment belongs to exactly one Job and one Customer. Payments are immutable once recorded — a mistake is corrected by deleting and re-recording, never by editing or by negative amounts (there is no refund concept).
+_Avoid_: Transaction, charge, invoice, receipt
+
+**Payment Method**: How a Payment's money arrived — one of PayPal, Bank Transfer, or Cash. Required on every Payment.
+_Avoid_: Channel, type, source
+
+**Fully Paid**: A Job is Fully Paid when the sum of its Payments meets or exceeds the Job's full price (`totalCents`). Overpayment still counts as Fully Paid and is recorded faithfully; no change owed is tracked. A zero-price Job is Fully Paid from creation. This is a payment property of a Job and is deliberately **not** a Stage.
+_Avoid_: Settled, closed, Paid (as a Stage)
+
 ### Configuration
 
 **Settings**: The single, global configuration for the installation. Holds the Service Fee applied to every Job, plus the Stringer's invoicing identity — full name, email, IBAN, and address. Exactly one Settings exists per installation; it is never created or deleted, only read and updated. Before the Stringer has saved anything, Settings reads back as defaults (Service Fee of zero, blank identity).

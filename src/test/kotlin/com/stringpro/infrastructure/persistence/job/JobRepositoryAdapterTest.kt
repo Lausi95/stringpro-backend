@@ -128,7 +128,7 @@ class JobRepositoryAdapterTest {
         val toDelete = adapter.save(aJob())
         adapter.save(toDelete.copy(deletedAt = Instant.now()))
 
-        val result = adapter.findAll(0, 20, null, null, null, null)
+        val result = adapter.findAll(0, 20, null, null, null, null, null)
 
         assertEquals(1, result.totalElements)
     }
@@ -139,7 +139,7 @@ class JobRepositoryAdapterTest {
         adapter.save(aJob(stage = Stage.IN_PROGRESS))
         adapter.save(aJob(stage = Stage.ANNOUNCED))
 
-        val result = adapter.findAll(0, 20, Stage.IN_PROGRESS, null, null, null)
+        val result = adapter.findAll(0, 20, Stage.IN_PROGRESS, null, null, null, null)
 
         assertEquals(2, result.totalElements)
         assertTrue(result.content.all { it.stage == Stage.IN_PROGRESS })
@@ -150,7 +150,7 @@ class JobRepositoryAdapterTest {
         adapter.save(aJob(customerId = "cust-1"))
         adapter.save(aJob(customerId = "cust-2"))
 
-        val result = adapter.findAll(0, 20, null, "cust-1", null, null)
+        val result = adapter.findAll(0, 20, null, "cust-1", null, null, null)
 
         assertEquals(1, result.totalElements)
         assertEquals("cust-1", result.content.single().customerId)
@@ -168,9 +168,26 @@ class JobRepositoryAdapterTest {
         ) // crosses match
         adapter.save(aJob(mains = StringChoice.Reel("reel-9", 3000))) // no match
 
-        val result = adapter.findAll(0, 20, null, null, null, "reel-1")
+        val result = adapter.findAll(0, 20, null, null, null, "reel-1", null)
 
         assertEquals(2, result.totalElements)
+    }
+
+    @Test
+    fun `should filter by payment state and round-trip the paid total`() {
+        // total per job = 2500 service + 3000 mains = 5500
+        adapter.save(aJob(amountPaidCents = 5500)) // fully paid
+        adapter.save(aJob(amountPaidCents = 2000)) // partially paid
+
+        val paid = adapter.findAll(0, 20, null, null, null, null, true)
+        val unpaid = adapter.findAll(0, 20, null, null, null, null, false)
+
+        assertEquals(1, paid.totalElements)
+        assertEquals(5500, paid.content.single().amountPaidCents)
+        assertTrue(paid.content.single().fullyPaid)
+        assertEquals(1, unpaid.totalElements)
+        assertEquals(2000, unpaid.content.single().amountPaidCents)
+        assertTrue(!unpaid.content.single().fullyPaid)
     }
 
     @Test
@@ -179,7 +196,7 @@ class JobRepositoryAdapterTest {
         adapter.save(aJob(stage = Stage.IN_PROGRESS, customerId = "cust-2"))
         adapter.save(aJob(stage = Stage.ANNOUNCED, customerId = "cust-1"))
 
-        val result = adapter.findAll(0, 20, Stage.IN_PROGRESS, "cust-1", null, null)
+        val result = adapter.findAll(0, 20, Stage.IN_PROGRESS, "cust-1", null, null, null)
 
         assertEquals(1, result.totalElements)
     }
@@ -190,7 +207,7 @@ class JobRepositoryAdapterTest {
         adapter.save(aJob(dueDate = LocalDate.of(2026, 1, 1)))
         adapter.save(aJob(dueDate = LocalDate.of(2026, 2, 1)))
 
-        val result = adapter.findAll(0, 20, null, null, null, null)
+        val result = adapter.findAll(0, 20, null, null, null, null, null)
 
         assertEquals(
             listOf(
@@ -206,8 +223,8 @@ class JobRepositoryAdapterTest {
     fun `should respect page and size boundaries`() {
         repeat(3) { adapter.save(aJob()) }
 
-        val firstPage = adapter.findAll(0, 2, null, null, null, null)
-        val secondPage = adapter.findAll(1, 2, null, null, null, null)
+        val firstPage = adapter.findAll(0, 2, null, null, null, null, null)
+        val secondPage = adapter.findAll(1, 2, null, null, null, null, null)
 
         assertEquals(3, firstPage.totalElements)
         assertEquals(2, firstPage.totalPages)
@@ -223,6 +240,7 @@ class JobRepositoryAdapterTest {
         mains: StringChoice = StringChoice.Reel("reel-1", 3000),
         crosses: StringChoice? = null,
         dueDate: LocalDate = LocalDate.of(2026, 12, 1),
+        amountPaidCents: Long = 0,
     ) = Job(
         id = UUID.randomUUID().toString(),
         customerId = customerId,
@@ -237,5 +255,6 @@ class JobRepositoryAdapterTest {
         serviceFeeCents = 2500,
         stage = stage,
         createdAt = Instant.now(),
+        amountPaidCents = amountPaidCents,
     )
 }

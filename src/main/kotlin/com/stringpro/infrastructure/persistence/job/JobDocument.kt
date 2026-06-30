@@ -33,5 +33,7 @@ data class JobDocument(
     val serviceFeeCents: Long,
     val stage: Stage,
     val createdAt: Instant,
+    val amountPaidCents: Long,
+    val fullyPaid: Boolean,
     val deletedAt: Instant?,
 )

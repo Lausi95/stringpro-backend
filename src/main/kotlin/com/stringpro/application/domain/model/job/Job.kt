@@ -17,6 +17,9 @@ data class Job(
     val serviceFeeCents: Long,
     val stage: Stage,
     val createdAt: Instant,
+    val amountPaidCents: Long = 0,
+    val fullyPaid: Boolean =
+        amountPaidCents >= serviceFeeCents + mainsString.feeCents + (crossesString?.feeCents ?: 0),
     val deletedAt: Instant? = null,
 ) {
     init {
@@ -26,6 +29,10 @@ data class Job(
         require(mainsTensionDeciKg > 0) { "Mains tension must be positive" }
         require(crossesTensionDeciKg > 0) { "Crosses tension must be positive" }
         require(serviceFeeCents >= 0) { "Service fee cannot be negative" }
+        require(amountPaidCents >= 0) { "Amount paid cannot be negative" }
+        require(fullyPaid == (amountPaidCents >= totalCents)) {
+            "fullyPaid must equal amountPaidCents >= totalCents"
+        }
     }
 
     /** Total customer-facing String Fee: mains plus crosses (charged once when not hybrid). */
@@ -35,6 +42,16 @@ data class Job(
     /** Full price of the Job: Service Fee plus total String Fee. */
     val totalCents: Long
         get() = serviceFeeCents + totalStringFeeCents
+
+    /**
+     * Apply a recomputed payment total. [fullyPaid] is always derived here, never set
+     * directly, so it can never drift from [amountPaidCents] and [totalCents].
+     */
+    fun withAmountPaid(amountPaidCents: Long): Job =
+        copy(
+            amountPaidCents = amountPaidCents,
+            fullyPaid = amountPaidCents >= totalCents,
+        )
 
     /** Advance (or hold) the Stage; backward moves are rejected. May skip ahead. */
     fun withStage(target: Stage): Job {

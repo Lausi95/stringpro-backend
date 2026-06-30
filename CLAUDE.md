@@ -56,7 +56,7 @@ Use these exact terms everywhere (code, logs, comments, API responses). See `CON
 
 > **String** (singular) is retired — it previously meant a string-product catalog entry, now superseded by **String Reel**.
 
-**Implemented aggregates:** `customer`, `racket`, `reel`, `settings`. **Job** and **Stage** are part of the domain language but not yet built — when you implement them, follow the same per-aggregate package layout.
+**Implemented aggregates:** `customer`, `racket`, `reel`, `settings`, `job` (with `Stage`), `payment`. Each follows the same per-aggregate package layout.
 
 ## Architecture
 

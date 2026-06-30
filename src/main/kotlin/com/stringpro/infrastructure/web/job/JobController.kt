@@ -76,7 +76,9 @@ class JobController(
     }
 
     @GetMapping
-    @Operation(summary = "List jobs (paginated), filterable by stage, customer, racket and reel")
+    @Operation(
+        summary = "List jobs (paginated), filterable by stage, customer, racket, reel and payment state",
+    )
     @ApiResponse(responseCode = "200", description = "OK")
     fun list(
         @RequestParam(defaultValue = "0") page: Int,
@@ -85,9 +87,10 @@ class JobController(
         @RequestParam(required = false) customerId: String?,
         @RequestParam(required = false) racketId: String?,
         @RequestParam(required = false) reelId: String?,
+        @RequestParam(required = false) fullyPaid: Boolean?,
     ): PagedJobResponse =
         listJobs
-            .list(ListJobsQuery(page, size, stage, customerId, racketId, reelId))
+            .list(ListJobsQuery(page, size, stage, customerId, racketId, reelId, fullyPaid))
             .toResponse()
 
     @GetMapping("/{id}")

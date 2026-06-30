@@ -16,5 +16,6 @@ interface JobRepository {
         customerId: String?,
         racketId: String?,
         reelId: String?,
+        fullyPaid: Boolean?,
     ): PageResult<Job>
 }
