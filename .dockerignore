@@ -1,0 +1,23 @@
+# Build output and caches — the image rebuilds these from source inside the
+# builder stage, and excluding them keeps the build context small and stops a
+# dirty host build/ from busting the layer cache.
+.git
+.gradle
+.kotlin
+build
+out
+
+# IDE / OS cruft
+.idea
+*.iml
+*.ipr
+*.iws
+.DS_Store
+*.class
+
+# Not needed in the build context
+Dockerfile
+.dockerignore
+docker-compose.yml
+docs
+*.md
