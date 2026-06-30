@@ -11,8 +11,6 @@
   gather_facts: false
 
   vars:
-    mongo_root_username: "{{ mongo_root_username | default('root') }}"
-    mongo_app_username: "{{ mongo_app_username | default('stringpro') }}"
     health_url: "https://stringpro-backend.lausi95.net/actuator/health"
 
   pre_tasks:
