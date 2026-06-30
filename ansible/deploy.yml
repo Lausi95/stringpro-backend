@@ -1,0 +1,93 @@
+---
+# Deploy-only playbook for stringpro-backend. Assumes Docker + the external
+# `traefik` network already exist on the host (it does NOT provision the box).
+#
+# Required extra-vars (passed by GitHub Actions from repo secrets):
+#   image_tag, mongo_root_password, mongo_app_password
+# Optional (have sane defaults below):
+#   mongo_root_username (root), mongo_app_username (stringpro)
+- name: Deploy stringpro-backend
+  hosts: stringpro
+  gather_facts: false
+
+  vars:
+    mongo_root_username: "{{ mongo_root_username | default('root') }}"
+    mongo_app_username: "{{ mongo_app_username | default('stringpro') }}"
+    health_url: "https://stringpro-backend.lausi95.net/actuator/health"
+
+  pre_tasks:
+    - name: Require image_tag
+      ansible.builtin.assert:
+        that:
+          - image_tag is defined
+          - image_tag | length > 0
+        fail_msg: "image_tag extra-var is required (the git SHA to deploy)."
+
+    - name: Require secrets
+      ansible.builtin.assert:
+        that:
+          - mongo_root_password is defined and mongo_root_password | length > 0
+          - mongo_app_password is defined and mongo_app_password | length > 0
+        fail_msg: "mongo_root_password and mongo_app_password extra-vars are required."
+
+    - name: Assert the external traefik network exists (fail fast)
+      ansible.builtin.command: docker network inspect traefik
+      register: traefik_net
+      changed_when: false
+      failed_when: traefik_net.rc != 0
+
+  tasks:
+    - name: Ensure app directory exists
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Render .env (secrets + image tag)
+      ansible.builtin.template:
+        src: templates/env.j2
+        dest: "{{ app_dir }}/.env"
+        mode: "0600"
+
+    - name: Copy prod compose file
+      ansible.builtin.copy:
+        src: files/docker-compose.prod.yml
+        dest: "{{ app_dir }}/docker-compose.prod.yml"
+        mode: "0644"
+
+    - name: Copy mongo init script
+      ansible.builtin.copy:
+        src: files/init-mongo.js
+        dest: "{{ app_dir }}/init-mongo.js"
+        mode: "0644"
+
+    - name: Pull the pinned image
+      ansible.builtin.command: docker compose -f docker-compose.prod.yml pull
+      args:
+        chdir: "{{ app_dir }}"
+      register: compose_pull
+      changed_when: "'Pulled' in compose_pull.stderr or 'Downloaded' in compose_pull.stdout"
+
+    - name: Bring up the stack
+      ansible.builtin.command: docker compose -f docker-compose.prod.yml up -d --remove-orphans
+      args:
+        chdir: "{{ app_dir }}"
+      register: compose_up
+      changed_when: "'Started' in compose_up.stderr or 'Recreated' in compose_up.stderr or 'Created' in compose_up.stderr"
+
+  post_tasks:
+    - name: Wait for the app to report healthy (deploy gate)
+      ansible.builtin.uri:
+        url: "{{ health_url }}"
+        method: GET
+        status_code: 200
+        validate_certs: true
+      register: health
+      until: health.status == 200
+      retries: 30
+      delay: 5
+
+    - name: Prune dangling images only (never -a; the frontend shares this box)
+      ansible.builtin.command: docker image prune -f
+      register: prune
+      changed_when: "'Total reclaimed space: 0B' not in prune.stdout"

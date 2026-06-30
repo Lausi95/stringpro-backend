@@ -1,0 +1,65 @@
+# Production stack for stringpro-backend.
+#
+# Deployed by Ansible (see ansible/deploy.yml), NOT run locally — the root
+# docker-compose.yml stays the local-dev file. All secrets and the image tag
+# come from the sibling .env (rendered by Ansible, mode 0600).
+#
+# Routing is via Traefik labels on the external `traefik` network. Mongo lives
+# on the internal network only and publishes no host port, so it is never
+# reachable from outside the box.
+services:
+  app:
+    image: ghcr.io/lausi95/stringpro-backend:${IMAGE_TAG}
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      # Least-privilege app user authenticates against the stringpro DB directly
+      # (authSource defaults to the DB in the path; init-mongo.js created it there).
+      MONGODB_URI: mongodb://${MONGO_APP_USERNAME}:${MONGO_APP_PASSWORD}@mongodb:27017/stringpro
+    networks:
+      - traefik
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+      - "traefik.http.routers.stringpro-backend.rule=Host(`stringpro-backend.lausi95.net`)"
+      - "traefik.http.routers.stringpro-backend.entrypoints=websecure"
+      - "traefik.http.routers.stringpro-backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.stringpro-backend.loadbalancer.server.port=8080"
+      - "traefik.http.services.stringpro-backend.loadbalancer.healthcheck.path=/actuator/health"
+
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: stringpro
+      # Consumed by init-mongo.js to create the least-privilege app user.
+      MONGO_APP_USERNAME: ${MONGO_APP_USERNAME}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD}
+    volumes:
+      - mongo-data:/data/db
+      # Runs ONCE on first volume init (see init-mongo.js header).
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - internal
+    healthcheck:
+      # mongo image has a shell + mongosh, so a real container healthcheck works
+      # here (unlike the distroless app). Gates app startup via depends_on.
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+networks:
+  traefik:
+    external: true
+  internal:
+    driver: bridge
+
+volumes:
+  mongo-data:

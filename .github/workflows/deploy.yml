@@ -1,0 +1,125 @@
+name: deploy
+
+# Continuous deployment: push to main runs verify -> build-and-push -> deploy.
+# workflow_dispatch with an image_tag input redeploys/rolls back an existing
+# image without rebuilding (skips verify + build).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Existing image tag (git SHA) to redeploy/rollback to. Leave blank to build from the current commit."
+        required: false
+        default: ""
+
+# Serialize deploys: a newer run supersedes an in-flight older one.
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/lausi95/stringpro-backend
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.resolve.outputs.image_tag }}
+      should_build: ${{ steps.resolve.outputs.should_build }}
+    steps:
+      - id: resolve
+        name: Resolve image tag and build mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.image_tag }}" ]; then
+            echo "image_tag=${{ github.event.inputs.image_tag }}" >> "$GITHUB_OUTPUT"
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+            echo "Rollback/redeploy to ${{ github.event.inputs.image_tag }} (no build)."
+          else
+            echo "image_tag=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            echo "Build + deploy ${{ github.sha }}."
+          fi
+
+  verify:
+    needs: setup
+    if: needs.setup.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: ktlint + tests (hard gate)
+        run: ./gradlew --no-daemon ktlintCheck test
+
+  build-and-push:
+    needs: [setup, verify]
+    if: needs.setup.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ needs.setup.outputs.image_tag }}
+            ${{ env.IMAGE }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: [setup, verify, build-and-push]
+    # Runs for both paths: full pipeline (verify+build succeed) and rollback
+    # (both skipped). Aborts if any needed job actually failed.
+    if: >
+      always() &&
+      needs.setup.result == 'success' &&
+      (needs.verify.result == 'success' || needs.verify.result == 'skipped') &&
+      (needs.build-and-push.result == 'success' || needs.build-and-push.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Install Ansible
+        run: pipx install --include-deps ansible-core
+
+      - name: Deploy
+        working-directory: ansible
+        env:
+          IMAGE_TAG: ${{ needs.setup.outputs.image_tag }}
+          MONGO_ROOT_PASSWORD: ${{ secrets.MONGO_ROOT_PASSWORD }}
+          MONGO_APP_PASSWORD: ${{ secrets.MONGO_APP_PASSWORD }}
+        run: |
+          ansible-playbook \
+            -i inventory.ini \
+            --private-key ~/.ssh/deploy_key \
+            deploy.yml \
+            -e "image_tag=${IMAGE_TAG}" \
+            -e "mongo_root_password=${MONGO_ROOT_PASSWORD}" \
+            -e "mongo_app_password=${MONGO_APP_PASSWORD}"

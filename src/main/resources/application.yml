@@ -9,13 +9,22 @@ spring:
   docker:
     compose:
       enabled: false
-  mongodb:
-    uri: ${MONGODB_URI:mongodb://localhost:27017/stringpro}
-    username: ${MONGODB_USERNAME:root}
-    password: ${MONGODB_PASSWORD:example}
+  data:
+    # Credentials are embedded in the URI (the URI takes full precedence over
+    # discrete username/password properties). Local default targets the
+    # docker-compose mongo (root/example in the admin DB). Prod supplies
+    # MONGODB_URI with the least-privilege app user (see docker-compose.prod.yml).
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://root:example@localhost:27017/stringpro?authSource=admin}
 
 server:
   port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
 
 springdoc:
   swagger-ui:
