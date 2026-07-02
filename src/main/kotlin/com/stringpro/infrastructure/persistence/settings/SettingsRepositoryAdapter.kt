@@ -17,7 +17,7 @@ class SettingsRepositoryAdapter(
             id = SINGLETON_ID,
             serviceFeeCents = serviceFeeCents,
             fullName = fullName,
-            email = email,
+            paypalHandle = paypalHandle,
             iban = iban,
             address = address,
             updatedAt = updatedAt,
@@ -27,7 +27,7 @@ class SettingsRepositoryAdapter(
         Settings(
             serviceFeeCents = serviceFeeCents,
             fullName = fullName,
-            email = email,
+            paypalHandle = paypalHandle,
             iban = iban,
             address = address,
             updatedAt = updatedAt,

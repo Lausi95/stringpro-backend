@@ -41,7 +41,7 @@ class SettingsController(
                 UpdateSettingsCommand(
                     serviceFeeCents = eurosToCents(request.serviceFee),
                     fullName = request.fullName.orEmpty(),
-                    email = request.email.orEmpty(),
+                    paypalHandle = request.paypalHandle.orEmpty().trim(),
                     iban = request.iban.orEmpty().replace(" ", "").uppercase(),
                     address = request.address.orEmpty(),
                 ),

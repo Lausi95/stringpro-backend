@@ -5,7 +5,7 @@ import java.time.Instant
 data class Settings(
     val serviceFeeCents: Long,
     val fullName: String,
-    val email: String,
+    val paypalHandle: String,
     val iban: String,
     val address: String,
     val updatedAt: Instant?,
@@ -15,7 +15,7 @@ data class Settings(
             Settings(
                 serviceFeeCents = 0,
                 fullName = "",
-                email = "",
+                paypalHandle = "",
                 iban = "",
                 address = "",
                 updatedAt = null,

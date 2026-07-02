@@ -24,7 +24,7 @@ class SettingsServiceTest {
 
         assertEquals(0, result.serviceFeeCents)
         assertEquals("", result.fullName)
-        assertEquals("", result.email)
+        assertEquals("", result.paypalHandle)
         assertEquals("", result.iban)
         assertEquals("", result.address)
         assertNull(result.updatedAt)
@@ -36,7 +36,7 @@ class SettingsServiceTest {
             Settings(
                 serviceFeeCents = 2000,
                 fullName = "Jane Stringer",
-                email = "jane@example.com",
+                paypalHandle = "JaneStringer",
                 iban = "DE89370400440532013000",
                 address = "123 Court St",
                 updatedAt = Instant.EPOCH,
@@ -58,7 +58,7 @@ class SettingsServiceTest {
                 UpdateSettingsCommand(
                     serviceFeeCents = 1550,
                     fullName = "Jane Stringer",
-                    email = "jane@example.com",
+                    paypalHandle = "JaneStringer",
                     iban = "DE89370400440532013000",
                     address = "123 Court St",
                 ),
@@ -66,7 +66,7 @@ class SettingsServiceTest {
 
         assertEquals(1550, result.serviceFeeCents)
         assertEquals("Jane Stringer", result.fullName)
-        assertEquals("jane@example.com", result.email)
+        assertEquals("JaneStringer", result.paypalHandle)
         assertEquals("DE89370400440532013000", result.iban)
         assertEquals("123 Court St", result.address)
         assertNotNull(result.updatedAt)

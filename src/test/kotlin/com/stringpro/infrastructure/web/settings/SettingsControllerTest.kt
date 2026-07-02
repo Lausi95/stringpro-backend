@@ -47,7 +47,7 @@ class SettingsControllerTest {
             status { isOk() }
             jsonPath("$.serviceFee") { value(15.50) }
             jsonPath("$.fullName") { value("Jane Stringer") }
-            jsonPath("$.email") { value("jane@example.com") }
+            jsonPath("$.paypalHandle") { value("JaneStringer") }
             jsonPath("$.iban") { value("DE89370400440532013000") }
             jsonPath("$.address") { value("123 Court St") }
         }
@@ -134,11 +134,25 @@ class SettingsControllerTest {
     }
 
     @Test
-    fun `should return 400 when email is malformed`() {
+    fun `should trim surrounding whitespace from the paypal handle before storing`() {
+        val slot = slot<UpdateSettingsCommand>()
+        every { updateSettings.update(capture(slot)) } returns aSettings()
+
         mvc.put("/settings") {
             with(jwt())
             contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsString(aUpdateRequest().copy(email = "not-an-email"))
+            content = objectMapper.writeValueAsString(aUpdateRequest().copy(paypalHandle = "  JaneStringer  "))
+        }.andExpect { status { isOk() } }
+
+        assertEquals("JaneStringer", slot.captured.paypalHandle)
+    }
+
+    @Test
+    fun `should return 400 when the paypal handle contains illegal characters`() {
+        mvc.put("/settings") {
+            with(jwt())
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(aUpdateRequest().copy(paypalHandle = "@JaneStringer"))
         }.andExpect { status { isBadRequest() } }
     }
 
@@ -161,7 +175,7 @@ class SettingsControllerTest {
         Settings(
             serviceFeeCents = 1550,
             fullName = "Jane Stringer",
-            email = "jane@example.com",
+            paypalHandle = "JaneStringer",
             iban = "DE89370400440532013000",
             address = "123 Court St",
             updatedAt = Instant.EPOCH,
@@ -171,7 +185,7 @@ class SettingsControllerTest {
         UpdateSettingsRequest(
             serviceFee = BigDecimal("15.50"),
             fullName = "Jane Stringer",
-            email = "jane@example.com",
+            paypalHandle = "JaneStringer",
             iban = "DE89370400440532013000",
             address = "123 Court St",
         )

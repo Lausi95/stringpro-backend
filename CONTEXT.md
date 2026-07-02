@@ -76,5 +76,8 @@ _Avoid_: Settled, closed, Paid (as a Stage)
 
 ### Configuration
 
-**Settings**: The single, global configuration for the installation. Holds the Service Fee applied to every Job, plus the Stringer's invoicing identity — full name, email, IBAN, and address. Exactly one Settings exists per installation; it is never created or deleted, only read and updated. Before the Stringer has saved anything, Settings reads back as defaults (Service Fee of zero, blank identity).
+**Settings**: The single, global configuration for the installation. Holds the Service Fee applied to every Job, plus the Stringer's invoicing identity — full name, PayPal Handle, IBAN, and address. Exactly one Settings exists per installation; it is never created or deleted, only read and updated. Before the Stringer has saved anything, Settings reads back as defaults (Service Fee of zero, blank identity).
 _Avoid_: Config, preferences, profile
+
+**PayPal Handle**: The Stringer's PayPal.Me username (the `<username>` in a `paypal.me/<username>` link), part of the Stringer's invoicing identity in Settings. Used to direct Customers to pay the Stringer via PayPal. Stored as the bare username; the `paypal.me/…` link is built from it where needed. Replaced the Stringer's email, which is no longer part of the model.
+_Avoid_: Email, PayPal email, PayPal.Me URL

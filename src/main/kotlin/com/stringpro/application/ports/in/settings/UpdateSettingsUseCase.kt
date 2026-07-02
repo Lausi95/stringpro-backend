@@ -9,7 +9,7 @@ interface UpdateSettingsUseCase {
 data class UpdateSettingsCommand(
     val serviceFeeCents: Long,
     val fullName: String,
-    val email: String,
+    val paypalHandle: String,
     val iban: String,
     val address: String,
 )

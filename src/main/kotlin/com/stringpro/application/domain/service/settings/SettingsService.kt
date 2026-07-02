@@ -19,7 +19,7 @@ class SettingsService(
             Settings(
                 serviceFeeCents = command.serviceFeeCents,
                 fullName = command.fullName,
-                email = command.email,
+                paypalHandle = command.paypalHandle,
                 iban = command.iban,
                 address = command.address,
                 updatedAt = Instant.now(),
